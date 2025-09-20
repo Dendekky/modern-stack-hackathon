@@ -6,6 +6,7 @@ import { api } from "../../convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { TicketStatus } from "@/types";
+import type { Id } from "../../convex/_generated/dataModel";
 
 interface TicketStatusUpdaterProps {
   ticketId: string;
@@ -34,9 +35,9 @@ export function TicketStatusUpdater({ ticketId, currentStatus, onUpdate }: Ticke
     setIsUpdating(true);
     try {
       await updateTicketStatus({
-        ticketId: ticketId as any,
+        ticketId: ticketId as Id<"tickets">,
         status: selectedStatus,
-        assignedAgentId: selectedAgent || undefined,
+        assignedAgentId: selectedAgent ? (selectedAgent as Id<"users">) : undefined,
       });
       onUpdate?.();
     } catch (error) {
