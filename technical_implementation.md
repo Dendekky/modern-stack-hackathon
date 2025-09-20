@@ -11,7 +11,7 @@
 - **Auth**: Better-Auth SDK
 - **AI**: OpenAI Node SDK
 - **Docs Enrichment**: Firecrawl SDK, Vector DB (Convex / Pinecone)
-- **Email**: Resend SDK
+- **Email**: Resend SDK + @convex-dev/resend component
 - **Voice**: Vapi SDK
 - **Payments**: Autumn SDK
 - **Analytics**: Recharts
@@ -25,9 +25,17 @@
   - Collections: `tickets`, `users`, `teams`.
   - Real-time subscriptions: `tickets` stream → agent dashboard.
   - Dashboard: Next.js frontend with live ticket list + assignment view.
-- **Resend**
-  - Trigger email on ticket creation: “Ticket received.”
-  - Trigger email on ticket status change: “Ticket resolved.”
+- **Resend Integration**
+  - **@convex-dev/resend component**: Official Convex-Resend integration with:
+    - **Queuing**: Send unlimited emails with guaranteed delivery
+    - **Batching**: Automatic batching for efficient API usage
+    - **Durable execution**: Retry logic with Convex workpools
+    - **Idempotency**: Prevents duplicate emails with managed keys
+    - **Rate limiting**: Respects Resend API limits
+  - **Email triggers**: 
+    - Ticket creation → "Ticket received" confirmation
+    - Status updates → "Ticket resolved/updated" notifications
+  - **Webhook integration**: Real-time email delivery status tracking
 
 ---
 
