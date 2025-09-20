@@ -1,6 +1,7 @@
 import { TicketForm } from "@/components/TicketForm";
 import { TicketDashboard } from "@/components/TicketDashboard";
 import { DemoSetup } from "@/components/DemoSetup";
+import { KnowledgeBase } from "@/components/KnowledgeBase";
 
 export default function Home() {
   return (
@@ -42,11 +43,21 @@ export default function Home() {
             </div>
           </div>
           
+          <div className="mt-12">
+            <div className="flex items-center space-x-3 mb-6">
+              <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                <span className="text-green-600 font-semibold">3</span>
+              </div>
+              <h2 className="text-2xl font-semibold text-gray-800">Knowledge Base</h2>
+            </div>
+            <KnowledgeBase />
+          </div>
+          
           <div className="mt-12 text-center">
             <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-full shadow-lg">
               <span className="mr-2">✅</span>
               <span className="font-medium">
-                Project Status: Basic ticketing system with Convex backend ready!
+                Project Status: AI-powered ticketing with Firecrawl knowledge base integration ready!
               </span>
             </div>
           </div>

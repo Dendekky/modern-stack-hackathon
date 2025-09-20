@@ -45,11 +45,17 @@
     - Categorize: {priority, type}.
     - Draft suggested reply.
     - Generate conversation summary.
-- **Firecrawl**
-  - Scrape docs/FAQ/changelog.
-  - Store embeddings in vector DB (Convex or Pinecone).
-  - On ticket creation: query embeddings → retrieve relevant docs.
-  - AI reply enriched with doc snippets.
+- **Firecrawl Knowledge Base**
+  - **Pre-scraped Documentation Sources**:
+    - Convex docs (docs.convex.dev) → Real-time database, functions, auth
+    - Resend docs (resend.com/docs) → Email delivery, templates, webhooks  
+    - Firecrawl docs (docs.firecrawl.dev) → Web scraping, data extraction
+  - **Implementation**:
+    - Store scraped content in Convex `knowledgeBase` collection
+    - Full-text search across documentation content
+    - On ticket creation: query knowledge base → retrieve relevant doc snippets
+    - AI reply enriched with official documentation context
+  - **Demo Value**: Shows real-world knowledge base integration using actual tool docs
 
 ---
 
@@ -93,7 +99,10 @@
 1. Next.js + Convex backend + dashboard.
 2. Resend email triggers.
 3. OpenAI categorization + draft replies.
-4. Firecrawl doc scraping + enrichment.
+4. **Firecrawl knowledge base setup**:
+   - Scrape Convex, Resend, and Firecrawl official documentation
+   - Build search and management UI
+   - Integrate with AI suggestions for contextual responses
 5. Better-Auth roles & login flows.
 6. Autumn Pro plan integration.
 7. Vapi voice ticketing unlock.

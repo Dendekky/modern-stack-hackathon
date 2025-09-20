@@ -30,10 +30,11 @@ Build a modern customer support ticketing system with:
 - Judge receives a “Ticket received” email.
 
 ### 2. AI Enhancements (OpenAI + Firecrawl)
-- New ticket comes in → auto-tagged as “Urgent – Billing.”
+- New ticket comes in → auto-tagged as "Urgent – Billing."
 - Suggested AI reply is drafted.
-- Firecrawl fetches docs to contextualize the answer.
-- Agent sees AI-powered suggestions with “Upgrade to Pro” upsell.
+- **Knowledge Base**: Pre-scraped Convex, Resend, and Firecrawl docs provide context.
+- AI reply enriched with relevant snippets from official documentation.
+- Agent sees AI-powered suggestions with "Upgrade to Pro" upsell.
 
 ### 3. Auth & Roles (Better-Auth)
 - Judge logs in as **customer** → sees ticket history.

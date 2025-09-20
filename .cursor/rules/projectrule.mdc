@@ -12,6 +12,7 @@ alwaysApply: true
 - Implement TypeScript strictly with proper type definitions
 - Prioritize performance and user experience for real-time ticket updates
 - Always update the progress.md file after features are implemented
+- Do not run the app or convex. The user typically has it running
 
 ## Component Architecture
 - Use functional components with hooks exclusively

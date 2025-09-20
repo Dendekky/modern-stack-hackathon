@@ -15,8 +15,17 @@ export const analyzeTicket = action({
     // Simulate AI analysis delay
     await new Promise(resolve => setTimeout(resolve, 1500));
 
-    // Mock AI analysis based on ticket content
-    const analysis = await simulateAIAnalysis(args.title, args.description);
+    // Search knowledge base for relevant documents
+    const relevantDocs = await ctx.runQuery(api.knowledgeBase.searchDocuments, {
+      searchTerm: `${args.title} ${args.description}`.substring(0, 100),
+    });
+
+    // Mock AI analysis based on ticket content and knowledge base
+    const analysis = await simulateAIAnalysis(
+      args.title, 
+      args.description, 
+      relevantDocs.slice(0, 3) // Use top 3 relevant docs
+    );
 
     // Update the ticket with AI suggestions
     await ctx.runMutation(api.tickets.addAISuggestions, {
@@ -38,18 +47,24 @@ export const generateSuggestedReply = action({
     // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 1000));
 
+    // Search knowledge base for relevant documents
+    const relevantDocs = await ctx.runQuery(api.knowledgeBase.searchDocuments, {
+      searchTerm: `${args.ticketTitle} ${args.ticketDescription}`.substring(0, 100),
+    });
+
     const suggestedReply = await simulateSuggestedReply(
       args.ticketTitle,
       args.ticketDescription,
-      args.category
+      args.category,
+      relevantDocs.slice(0, 2) // Use top 2 relevant docs
     );
 
     return { suggestedReply };
   },
 });
 
-// Mock AI analysis function
-async function simulateAIAnalysis(title: string, description: string) {
+// Mock AI analysis function with knowledge base integration
+async function simulateAIAnalysis(title: string, description: string, relevantDocs: any[] = []) {
   const titleLower = title.toLowerCase();
   const descriptionLower = description.toLowerCase();
 
@@ -81,18 +96,21 @@ async function simulateAIAnalysis(title: string, description: string) {
     suggestedReply = "Thank you for your feature suggestion! I'll forward this to our product team for consideration. We appreciate your feedback in helping us improve our service.";
   }
 
+  // Enhance reply with knowledge base context
+  if (relevantDocs.length > 0) {
+    const docTitles = relevantDocs.map(doc => doc.title);
+    suggestedReply += `\n\nI found some relevant documentation that might help: ${docTitles.join(", ")}. Let me provide you with the specific information from our knowledge base.`;
+  }
+
   return {
     category,
     priority,
     suggestedReply,
-    relevantDocs: [
-      `Knowledge Base: ${category} FAQ`,
-      `Documentation: ${category} troubleshooting guide`
-    ],
+    relevantDocs: relevantDocs.map(doc => doc.title || doc.url || "Relevant document"),
   };
 }
 
-async function simulateSuggestedReply(title: string, description: string, category?: string) {
+async function simulateSuggestedReply(title: string, description: string, category?: string, relevantDocs: any[] = []) {
   // Generate contextual reply based on category and content
   const baseReplies = {
     billing: "I've reviewed your billing inquiry and found the following information about your account...",
@@ -103,5 +121,20 @@ async function simulateSuggestedReply(title: string, description: string, catego
     general: "Thank you for reaching out. I've reviewed your inquiry and here's how I can help..."
   };
 
-  return baseReplies[category as keyof typeof baseReplies] || baseReplies.general;
+  let reply = baseReplies[category as keyof typeof baseReplies] || baseReplies.general;
+
+  // Enhance reply with knowledge base context
+  if (relevantDocs.length > 0) {
+    reply += `\n\nBased on our knowledge base, I found these relevant resources:\n`;
+    relevantDocs.forEach((doc, index) => {
+      reply += `${index + 1}. ${doc.title}\n`;
+      if (doc.content) {
+        // Add a snippet from the document
+        const snippet = doc.content.substring(0, 150);
+        reply += `   "${snippet}${doc.content.length > 150 ? '...' : ''}"\n`;
+      }
+    });
+  }
+
+  return reply;
 }
