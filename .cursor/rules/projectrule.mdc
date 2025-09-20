@@ -1,0 +1,97 @@
+---
+description: React best practices for modern customer support ticketing system
+globs: ["**/*.tsx", "**/*.jsx", "**/*.ts", "**/*.js"]
+alwaysApply: true
+---
+
+# React Best Practices for Customer Support Ticketing System
+
+## Core Principles
+- Follow the project plan in project_plan.md and technical_implementation.md
+- Use Next.js 14 App Router patterns
+- Implement TypeScript strictly with proper type definitions
+- Prioritize performance and user experience for real-time ticket updates
+- Always update the progress.md file after features are implemented
+
+## Component Architecture
+- Use functional components with hooks exclusively
+- Implement proper component composition and avoid prop drilling
+- Create reusable UI components using shadcn/ui patterns
+- Separate business logic from presentation components
+- Use custom hooks for complex state management and API calls
+
+## State Management
+- Use Convex real-time subscriptions for ticket data
+- Implement React Query for additional caching when needed
+- Use React Context for global app state (auth, theme, etc.)
+- Prefer local state with useState/useReducer for component-specific state
+- Avoid unnecessary re-renders with proper memoization
+
+## Performance Optimization
+- Use React.memo() for expensive components that receive stable props
+- Implement useMemo() for expensive calculations
+- Use useCallback() for event handlers passed to child components
+- Implement proper loading states and error boundaries
+- Use dynamic imports for code splitting (especially for Pro features)
+
+## useEffect Best Practices
+- **Avoid useEffect when possible** - prefer derived state and event handlers
+- Only use useEffect for true side effects (DOM manipulation, timers, external subscriptions)
+- **DO NOT use useEffect for API calls** - use Convex hooks or React Query instead
+- Use useEffect for synchronization with external systems (non-Convex subscriptions, timers)
+- Prefer event handlers over useEffect for user interactions
+- Use proper dependency arrays - include all values from component scope that are used inside the effect
+- Clean up subscriptions and timers in the cleanup function
+- Avoid useEffect for state updates that can be derived from props/state
+- Use multiple focused useEffect hooks instead of one large effect
+- Consider using custom hooks to encapsulate complex effect logic
+
+## Real-time Features (Convex Integration)
+- Use Convex subscriptions for live ticket updates
+- Implement optimistic updates for better UX
+- Handle connection states gracefully
+- Use proper error handling for real-time data
+
+## Authentication & Authorization (Better-Auth)
+- Implement role-based access control (Customer vs Agent)
+- Use protected routes and components
+- Handle authentication states properly
+- Implement proper session management
+
+## Styling & UI (TailwindCSS + shadcn/ui)
+- Use TailwindCSS utility classes consistently
+- Leverage shadcn/ui components for consistency
+- Implement responsive design patterns
+- Use Framer Motion for smooth animations
+- Follow accessibility best practices
+
+## TypeScript Standards
+- Define proper interfaces for all data structures
+- Use strict TypeScript configuration
+- Implement proper error types
+- Use generic types for reusable components
+- Avoid 'any' type usage
+
+## Code Organization
+- Use barrel exports (index.ts files) for clean imports
+- Organize components by feature/domain
+- Separate API logic into dedicated service files
+- Use proper file naming conventions (PascalCase for components)
+
+## Error Handling
+- Implement error boundaries for component error handling
+- Use proper try-catch blocks for async operations
+- Provide meaningful error messages to users
+- Log errors appropriately for debugging
+
+## Testing Considerations
+- Write testable components with clear interfaces
+- Mock external dependencies (Convex, APIs)
+- Test user interactions and state changes
+- Implement proper test data factories
+
+## Pro Feature Integration
+- Implement feature flags for Pro vs Free functionality
+- Use conditional rendering for premium features
+- Handle upgrade flows gracefully
+- Implement proper feature gating
