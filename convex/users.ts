@@ -68,6 +68,19 @@ export const updateUserPlan = mutation({
   },
 });
 
+// Update user role
+export const updateUserRole = mutation({
+  args: {
+    userId: v.id("users"),
+    role: v.union(v.literal("customer"), v.literal("agent")),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.userId, {
+      role: args.role,
+    });
+  },
+});
+
 // Get all agents (for assignment)
 export const getAgents = query({
   args: {},

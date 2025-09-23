@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { ConvexClientProvider } from '@/components/ConvexProvider'
+import { AuthHeader } from '@/components/auth/AuthHeader'
+import { AuthGate } from '@/components/auth/AuthGate'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -20,7 +22,10 @@ export default function RootLayout({
       <body className={inter.className}>
         <ConvexClientProvider>
           <div className="min-h-screen bg-background">
-            {children}
+            <AuthHeader />
+            <AuthGate>
+              {children}
+            </AuthGate>
           </div>
         </ConvexClientProvider>
       </body>

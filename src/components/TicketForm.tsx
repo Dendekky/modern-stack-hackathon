@@ -4,12 +4,14 @@ import { useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Button } from "@/components/ui/button";
+import { authClient } from "@/lib/auth-client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function TicketForm() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { data: session } = authClient.useSession();
   
   const createTicket = useMutation(api.tickets.createTicket);
   const createUser = useMutation(api.users.createUser);
@@ -20,13 +22,21 @@ export function TicketForm() {
 
     setIsSubmitting(true);
     try {
-      // For demo purposes, create a temporary customer user
-      // In a real app, this would come from authentication
-      const customerId = await createUser({
-        email: "customer@demo.com",
-        name: "Demo Customer",
-        role: "customer",
-      });
+      // If signed in, use session user; otherwise create a demo customer
+      let customerId: string;
+      if (session?.user?.email) {
+        customerId = await createUser({
+          email: session.user.email,
+          name: session.user.name || session.user.email,
+          role: "customer",
+        });
+      } else {
+        customerId = await createUser({
+          email: "customer@demo.com",
+          name: "Demo Customer",
+          role: "customer",
+        });
+      }
 
       await createTicket({
         title: title.trim(),

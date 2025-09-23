@@ -5,9 +5,15 @@ import { api } from "../../convex/_generated/api";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { TicketStatusUpdater } from "./TicketStatusUpdater";
 import { AISuggestions } from "./AISuggestions";
+import { authClient } from "@/lib/auth-client";
 
 export function TicketDashboard() {
   const tickets = useQuery(api.tickets.getAllTickets);
+  const { data: session, isPending } = authClient.useSession();
+  const me = useQuery(
+    api.users.getUserByEmail,
+    session?.user?.email ? { email: session.user.email } : ("skip" as any)
+  );
 
   if (tickets === undefined) {
     return (
@@ -22,6 +28,23 @@ export function TicketDashboard() {
         </Card>
       </div>
     );
+  }
+
+  if (!isPending && me !== undefined) {
+    const isAgent = me?.role === "agent";
+    if (!isAgent) {
+      return (
+        <Card>
+          <CardHeader>
+            <CardTitle>Agent Dashboard</CardTitle>
+            <CardDescription>Agents only. Sign in as an agent to view tickets.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-gray-600 text-sm">Access denied</div>
+          </CardContent>
+        </Card>
+      );
+    }
   }
 
   return (

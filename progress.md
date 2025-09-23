@@ -41,17 +41,16 @@
 - ✅ Updated project plan and technical docs to reflect knowledge base strategy
 
 ## 📋 Next Steps
-1. **Better-Auth** - User authentication and role-based access
-2. **Autumn Integration** - Pro plan monetization
-3. **Vapi Voice Features** - Voice ticketing for Pro users
-4. **Analytics Dashboard** - Reporting and metrics (stretch goal)
+1. **Autumn Integration** - Pro plan monetization
+2. **Vapi Voice Features** - Voice ticketing for Pro users
+3. **Analytics Dashboard** - Reporting and metrics (stretch goal)
 
 ## 🎯 Demo Flow Status
 - ✅ Basic ticket submission and dashboard
 - ✅ Email notifications (simulated)
 - ✅ AI enhancements (categorization, priority detection, suggested replies)
 - ✅ Knowledge base integration with document scraping and search
-- ⏳ Authentication and roles
+- ✅ Authentication and roles (Better-Auth email/password, AuthGate, Convex role gating)
 - ⏳ Pro feature monetization
 - ⏳ Voice ticketing unlock
 

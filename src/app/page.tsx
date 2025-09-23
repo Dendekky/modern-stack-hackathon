@@ -1,9 +1,21 @@
+"use client";
 import { TicketForm } from "@/components/TicketForm";
 import { TicketDashboard } from "@/components/TicketDashboard";
 import { DemoSetup } from "@/components/DemoSetup";
 import { KnowledgeBase } from "@/components/KnowledgeBase";
+import { authClient } from "@/lib/auth-client";
+import { useQuery } from "convex/react";
+import { api } from "../../convex/_generated/api";
 
 export default function Home() {
+  const { data: session } = authClient.useSession();
+  const me = useQuery(
+    api.users.getUserByEmail,
+    session?.user?.email ? { email: session.user.email } : ("skip" as any)
+  );
+
+  const isAgent = me?.role === "agent";
+
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <div className="container mx-auto px-4 py-12">
@@ -21,7 +33,17 @@ export default function Home() {
             <DemoSetup />
           </div>
           
-          <div className="grid lg:grid-cols-2 gap-8">
+          {isAgent ? (
+            <div className="space-y-6">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                  <span className="text-purple-600 font-semibold">1</span>
+                </div>
+                <h2 className="text-2xl font-semibold text-gray-800">Agent Dashboard</h2>
+              </div>
+              <TicketDashboard />
+            </div>
+          ) : (
             <div className="space-y-6">
               <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
@@ -31,17 +53,7 @@ export default function Home() {
               </div>
               <TicketForm />
             </div>
-            
-            <div className="space-y-6">
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                  <span className="text-purple-600 font-semibold">2</span>
-                </div>
-                <h2 className="text-2xl font-semibold text-gray-800">Agent Dashboard</h2>
-              </div>
-              <TicketDashboard />
-            </div>
-          </div>
+          )}
           
           <div className="mt-12">
             <div className="flex items-center space-x-3 mb-6">
