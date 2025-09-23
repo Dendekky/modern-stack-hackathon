@@ -47,6 +47,11 @@ export const createTicket = mutation({
       title: args.title,
       description: args.description,
     });
+
+    // Schedule AI conversation summary (initial summary after creation)
+    await ctx.scheduler.runAfter(4000, api.ai.generateConversationSummary, {
+      ticketId: ticketId,
+    });
     
     return ticketId;
   },
@@ -145,6 +150,41 @@ export const addAISuggestions = mutation({
   handler: async (ctx, args) => {
     await ctx.db.patch(args.ticketId, {
       aiSuggestions: args.suggestions,
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+// Get a single ticket by id (for AI summary and other actions)
+export const getTicketById = query({
+  args: { ticketId: v.id("tickets") },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.ticketId);
+  },
+});
+
+// Get messages for a ticket in chronological order
+export const getMessagesForTicket = query({
+  args: { ticketId: v.id("tickets") },
+  handler: async (ctx, args) => {
+    const messages = await ctx.db
+      .query("messages")
+      .withIndex("by_ticket", (q) => q.eq("ticketId", args.ticketId))
+      .order("asc")
+      .collect();
+    return messages;
+  },
+});
+
+// Update AI summary on a ticket
+export const updateAISummary = mutation({
+  args: {
+    ticketId: v.id("tickets"),
+    summary: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.ticketId, {
+      aiSummary: args.summary,
       updatedAt: Date.now(),
     });
   },

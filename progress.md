@@ -31,7 +31,8 @@
 - ✅ Resend email integration with ticket creation and status update notifications
 - ✅ Enhanced agent dashboard with ticket status management
 - ✅ Real-time ticket assignment functionality
-- ✅ OpenAI integration with AI-powered ticket categorization and suggested replies
+- ✅ OpenAI integration (real SDK) for ticket categorization and suggested replies
+- ✅ OpenAI conversation summaries stored on tickets
 - ✅ Smart AI analysis component with priority detection and response suggestions
 - ✅ Demo data seeding for testing agent assignments
 - ✅ Firecrawl integration with knowledge base document scraping (real API implementation)

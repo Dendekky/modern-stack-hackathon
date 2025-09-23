@@ -43,6 +43,7 @@ export default defineSchema({
       suggestedReply: v.optional(v.string()),
       relevantDocs: v.optional(v.array(v.string())),
     })),
+    aiSummary: v.optional(v.string()),
     isVoiceTicket: v.optional(v.boolean()),
     voiceTranscript: v.optional(v.string()),
   })
