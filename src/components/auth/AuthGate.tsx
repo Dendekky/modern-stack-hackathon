@@ -1,53 +1,14 @@
 "use client";
 
-import { ReactNode, useEffect, useMemo, useState } from "react";
+import { ReactNode, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useMutation, useQuery, useAction } from "convex/react";
+import { useMutation, useAction } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 
 export function AuthGate({ children }: { children: ReactNode }) {
   const { data: session, isPending, error } = authClient.useSession();
-  const updateUserProfile = useMutation(api.users.updateUserProfile);
-  const getUser = useQuery(
-    api.users.getUserByEmail,
-    session?.user?.email ? { email: session.user.email } : ("skip" as any)
-  );
-
-  const sendWelcomeEmail = useAction(api.emails.sendWelcomeEmail);
-  const sendSignInEmail = useAction(api.emails.sendSignInNotificationEmail);
-
-  useEffect(() => {
-    if (session?.user?.id && getUser === null) {
-      // Set default role for new users (Better Auth handles user creation)
-      updateUserProfile({
-        userId: session.user.id,
-        role: "customer",
-        plan: "free",
-      }).catch(() => {});
-
-      // Send welcome email for new users
-      if (session?.user?.email && session?.user?.name) {
-        sendWelcomeEmail({
-          to: session.user.email,
-          name: session.user.name,
-          role: "customer", // Default role for new signups
-        }).catch((e) => {
-          console.error("Error sending welcome email:", e);
-        });
-      }
-    } else if (session?.user?.id && getUser && session?.user?.email && session?.user?.name) {
-      // Send signin notification for existing users
-      sendSignInEmail({
-        to: session.user.email,
-        name: session.user.name,
-        loginTime: new Date().toLocaleString(),
-      }).catch((e) => {
-        console.error("Error sending signin notification email:", e);
-      });
-    }
-  }, [session?.user?.id, getUser, updateUserProfile, sendWelcomeEmail, sendSignInEmail]);
 
   if (isPending) {
     return (
@@ -92,8 +53,10 @@ function AuthForm() {
     if (!normalizedEmail || !password) return;
     setFormError(null);
     setSubmitting(true);
+    
     try {
       if (mode === "signin") {
+        // Sign in the user
         const res = await fetch(`/api/auth/sign-in/email`, {
           method: "POST",
           headers: { "content-type": "application/json" },
@@ -103,22 +66,24 @@ function AuthForm() {
           const data = await res.json().catch(() => ({}));
           throw data;
         }
+        
+        // Notify the auth client to update session
         (authClient as any).$store.notify("$sessionSignal");
-
-        // Send signin notification email
-        // We'll get the user's name from the session after signin
-        setTimeout(() => {
-          if (normalizedEmail) {
-            sendSignInEmail({
-              to: normalizedEmail,
-              name: "User", // Fallback name, will be updated when session loads
-              loginTime: new Date().toLocaleString(),
-            }).catch((e) => {
-              console.error("Error sending signin notification email:", e);
-            });
-          }
-        }, 1000);
+        
+        // Send signin notification email immediately after successful signin
+        try {
+          await sendSignInEmail({
+            to: normalizedEmail,
+            name: name || "User", // Use the name from form or fallback
+            loginTime: new Date().toLocaleString(),
+          });
+        } catch (emailError) {
+          console.error("Error sending signin notification email:", emailError);
+          // Don't fail the signin if email fails
+        }
+        
       } else {
+        // Sign up the user
         const res = await fetch(`/api/auth/sign-up/email`, {
           method: "POST",
           headers: { "content-type": "application/json" },
@@ -128,19 +93,37 @@ function AuthForm() {
           const data = await res.json().catch(() => ({}));
           throw data;
         }
-        // Better Auth handles user creation, we'll set the profile after sign-up
-        // Profile will be set via the useEffect above when session is established
+        
+        // Notify the auth client to update session
         (authClient as any).$store.notify("$sessionSignal");
-
-        // Send welcome email for new signup
-        if (name && normalizedEmail) {
-          sendWelcomeEmail({
+        
+        // Wait a moment for the session to be established, then set user profile
+        setTimeout(async () => {
+          try {
+            // Get the new session to get the user ID
+            const currentSession = await authClient.getSession();
+            if (currentSession && 'user' in currentSession && currentSession.user && typeof currentSession.user === 'object' && 'id' in currentSession.user) {
+              await updateUserProfile({
+                userId: currentSession.user.id as string,
+                role: role,
+                plan: "free",
+              });
+            }
+          } catch (profileError) {
+            console.error("Error updating user profile:", profileError);
+          }
+        }, 500);
+        
+        // Send welcome email immediately after successful signup
+        try {
+          await sendWelcomeEmail({
             to: normalizedEmail,
             name: name,
             role: role,
-          }).catch((e) => {
-            console.error("Error sending welcome email:", e);
           });
+        } catch (emailError) {
+          console.error("Error sending welcome email:", emailError);
+          // Don't fail the signup if email fails
         }
       }
     } catch (err: any) {
