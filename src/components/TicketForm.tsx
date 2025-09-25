@@ -6,12 +6,14 @@ import { api } from "../../convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useRouter } from "next/navigation";
 
 export function TicketForm() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { data: session } = authClient.useSession();
+  const router = useRouter();
   
   const createTicket = useMutation(api.tickets.createTicket);
   const getUserByEmail = useQuery(
@@ -42,7 +44,13 @@ export function TicketForm() {
       // Reset form
       setTitle("");
       setDescription("");
-      alert("Ticket created successfully!");
+      
+      // Redirect to customer tickets page if user is a customer
+      if (getUserByEmail?.role === "customer") {
+        router.push("/my-tickets");
+      } else {
+        alert("Ticket created successfully!");
+      }
     } catch (error) {
       console.error("Error creating ticket:", error);
       alert("Failed to create ticket. Please try again.");

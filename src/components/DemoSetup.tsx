@@ -11,9 +11,12 @@ export function DemoSetup() {
   const [isSeeded, setIsSeeded] = useState(false);
   const [isKnowledgeBaseSeeding, setIsKnowledgeBaseSeeding] = useState(false);
   const [isKnowledgeBaseSeeded, setIsKnowledgeBaseSeeded] = useState(false);
+  const [isFixingRoles, setIsFixingRoles] = useState(false);
+  const [rolesFixed, setRolesFixed] = useState(false);
   
   const seedDemoData = useMutation(api.demo.seedDemoData);
   const setupDemoKnowledgeBase = useAction(api.demoKnowledgeBase.setupDemoKnowledgeBase);
+  const fixUnsetRoles = useMutation(api.users.fixUnsetRoles);
 
   const handleSeedData = async () => {
     setIsSeeding(true);
@@ -38,6 +41,21 @@ export function DemoSetup() {
       console.error("Error setting up knowledge base:", error);
     } finally {
       setIsKnowledgeBaseSeeding(false);
+    }
+  };
+
+  const handleFixRoles = async () => {
+    setIsFixingRoles(true);
+    try {
+      const result = await fixUnsetRoles({});
+      console.log("Fixed user roles:", result);
+      setRolesFixed(true);
+      // Refresh the page to show updated roles
+      window.location.reload();
+    } catch (error) {
+      console.error("Error fixing user roles:", error);
+    } finally {
+      setIsFixingRoles(false);
     }
   };
 
@@ -79,9 +97,18 @@ export function DemoSetup() {
           >
             {isKnowledgeBaseSeeding ? "Loading docs..." : isKnowledgeBaseSeeded ? "✅ Docs Loaded" : "Load Knowledge Base"}
           </Button>
+          <Button
+            onClick={handleFixRoles}
+            disabled={isFixingRoles || rolesFixed}
+            variant="outline"
+            className="border-red-300 text-red-800 hover:bg-red-100"
+          >
+            {isFixingRoles ? "Fixing..." : rolesFixed ? "✅ Roles Fixed" : "Fix User Roles"}
+          </Button>
         </div>
         <p className="text-xs text-yellow-700 mt-3">
-          Knowledge base includes Convex, Resend, and Firecrawl documentation for realistic AI responses.
+          Knowledge base includes Convex, Resend, and Firecrawl documentation for realistic AI responses.<br />
+          <strong>Fix User Roles</strong> if you see "unset" roles in the database.
         </p>
       </CardContent>
     </Card>

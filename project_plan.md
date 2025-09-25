@@ -28,6 +28,7 @@ Build a modern customer support ticketing system with:
 - Judge submits a **text ticket** through form.
 - Agent dashboard updates in real-time.
 - Judge receives a “Ticket received” email.
+ - Judge visits **My Tickets** and sees the new ticket with status/priority.
 
 ### 2. AI Enhancements (OpenAI + Firecrawl)
 - New ticket comes in → auto-tagged as "Urgent – Billing."
@@ -35,10 +36,15 @@ Build a modern customer support ticketing system with:
 - **Knowledge Base**: Pre-scraped Convex, Resend, and Firecrawl docs provide context.
 - AI reply enriched with relevant snippets from official documentation.
 - Agent sees AI-powered suggestions with "Upgrade to Pro" upsell.
+ - Customer opens **Ticket Detail** to view live status and conversation timeline.
 
 ### 3. Auth & Roles (Better-Auth)
 - Judge logs in as **customer** → sees ticket history.
 - Switches to **agent** → sees team dashboard and ticket assignments.
+ - Customer Portal includes:
+   - **My Tickets** list with filters, status, priority, last updated.
+   - **Ticket Detail** with conversation thread and AI summary.
+   - **Real-time updates** via Convex subscriptions for status/messages.
 
 ### 4. Monetization Moment (Autumn + Vapi)
 - Free plan: text-only ticket submission.
@@ -59,4 +65,25 @@ Build a modern customer support ticketing system with:
 - AI layered in → instant delight.
 - Auth → real SaaS feel.
 - Autumn unlock → cinematic finale.
+
+---
+
+## 🔧 Customer Portal Enhancements (Robustness)
+- **My Tickets page**: List all customer tickets with status, priority, created/updated times.
+- **Ticket Detail page**: Full conversation (agent messages and AI-authored replies once sent) and AI summary.
+- **Real-time**: Live status and message updates using Convex subscriptions.
+- **Access control**: Only ticket owners can view their tickets and conversations.
+- **Email parity**: In-app views mirror email updates for consistency.
+
+---
+
+## 🧱 Development Order
+1. Next.js + Convex backend + dashboard (+ Customer Portal: My Tickets + Ticket Detail).
+2. Resend email triggers.
+3. OpenAI categorization + draft replies.
+4. Firecrawl knowledge base setup.
+5. Better-Auth roles & login flows.
+6. Autumn Pro plan integration.
+7. Vapi voice ticketing unlock.
+8. (Stretch) Analytics dashboard.
 

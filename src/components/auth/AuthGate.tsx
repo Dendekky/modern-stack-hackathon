@@ -4,7 +4,7 @@ import { ReactNode, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useMutation, useAction } from "convex/react";
+import { useAction } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 
 export function AuthGate({ children }: { children: ReactNode }) {
@@ -43,7 +43,6 @@ function AuthForm() {
   const [role, setRole] = useState<"customer" | "agent">("customer");
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
-  const updateUserProfile = useMutation(api.users.updateUserProfile);
   const sendWelcomeEmail = useAction(api.emails.sendWelcomeEmail);
   const sendSignInEmail = useAction(api.emails.sendSignInNotificationEmail);
 
@@ -87,7 +86,13 @@ function AuthForm() {
         const res = await fetch(`/api/auth/sign-up/email`, {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ name, email: normalizedEmail, password }),
+          body: JSON.stringify({ 
+            name, 
+            email: normalizedEmail, 
+            password,
+            role: role,
+            plan: "free"
+          }),
         });
         if (!res.ok) {
           const data = await res.json().catch(() => ({}));
@@ -96,23 +101,6 @@ function AuthForm() {
         
         // Notify the auth client to update session
         (authClient as any).$store.notify("$sessionSignal");
-        
-        // Wait a moment for the session to be established, then set user profile
-        setTimeout(async () => {
-          try {
-            // Get the new session to get the user ID
-            const currentSession = await authClient.getSession();
-            if (currentSession && 'user' in currentSession && currentSession.user && typeof currentSession.user === 'object' && 'id' in currentSession.user) {
-              await updateUserProfile({
-                userId: currentSession.user.id as string,
-                role: role,
-                plan: "free",
-              });
-            }
-          } catch (profileError) {
-            console.error("Error updating user profile:", profileError);
-          }
-        }, 500);
         
         // Send welcome email immediately after successful signup
         try {

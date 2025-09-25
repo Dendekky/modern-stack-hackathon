@@ -31,10 +31,10 @@ export const createTicket = mutation({
     const customer = await ctx.db.get(args.customerId);
     
     // Schedule email notification
-    if (customer) {
+    if (customer && customer.email) {
       await ctx.scheduler.runAfter(0, api.emails.sendTicketCreatedEmail, {
         to: customer.email,
-        customerName: customer.name,
+        customerName: customer.name || "Customer",
         ticketId: ticketId,
         ticketTitle: args.title,
         ticketDescription: args.description,
@@ -123,14 +123,14 @@ export const updateTicketStatus = mutation({
     const agent = args.assignedAgentId ? await ctx.db.get(args.assignedAgentId) : null;
     
     // Send status update email
-    if (customer && args.status !== "open") {
+    if (customer && customer.email && args.status !== "open") {
       await ctx.scheduler.runAfter(0, api.emails.sendTicketStatusEmail, {
         to: customer.email,
-        customerName: customer.name,
+        customerName: customer.name || "Customer",
         ticketId: args.ticketId,
         ticketTitle: ticket.title,
         status: args.status,
-        agentName: agent?.name,
+        agentName: agent?.name || undefined,
       });
     }
   },
@@ -163,7 +163,7 @@ export const getTicketById = query({
   },
 });
 
-// Get messages for a ticket in chronological order
+// Get messages for a ticket in chronological order with author info
 export const getMessagesForTicket = query({
   args: { ticketId: v.id("tickets") },
   handler: async (ctx, args) => {
@@ -172,7 +172,45 @@ export const getMessagesForTicket = query({
       .withIndex("by_ticket", (q) => q.eq("ticketId", args.ticketId))
       .order("asc")
       .collect();
-    return messages;
+    
+    // Enrich with author information
+    const enrichedMessages = await Promise.all(
+      messages.map(async (message) => {
+        const author = await ctx.db.get(message.authorId);
+        return {
+          ...message,
+          author,
+        };
+      })
+    );
+    
+    return enrichedMessages;
+  },
+});
+
+// Add a message to a ticket
+export const addMessage = mutation({
+  args: {
+    ticketId: v.id("tickets"),
+    authorId: v.id("authUsers"),
+    content: v.string(),
+    isInternal: v.optional(v.boolean()),
+  },
+  handler: async (ctx, args) => {
+    const messageId = await ctx.db.insert("messages", {
+      ticketId: args.ticketId,
+      authorId: args.authorId,
+      content: args.content,
+      isInternal: args.isInternal || false,
+      createdAt: Date.now(),
+    });
+    
+    // Update ticket's updatedAt timestamp
+    await ctx.db.patch(args.ticketId, {
+      updatedAt: Date.now(),
+    });
+    
+    return messageId;
   },
 });
 

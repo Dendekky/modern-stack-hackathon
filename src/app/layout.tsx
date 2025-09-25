@@ -4,6 +4,7 @@ import './globals.css'
 import { ConvexClientProvider } from '@/components/ConvexProvider'
 import { AuthHeader } from '@/components/auth/AuthHeader'
 import { AuthGate } from '@/components/auth/AuthGate'
+import { Navigation } from '@/components/Navigation'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -24,6 +25,7 @@ export default function RootLayout({
           <div className="min-h-screen bg-background">
             <AuthHeader />
             <AuthGate>
+              <Navigation />
               {children}
             </AuthGate>
           </div>

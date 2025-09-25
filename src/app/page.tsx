@@ -6,15 +6,25 @@ import { KnowledgeBase } from "@/components/KnowledgeBase";
 import { authClient } from "@/lib/auth-client";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function Home() {
   const { data: session } = authClient.useSession();
+  const router = useRouter();
   const me = useQuery(
     api.users.getUserByEmail,
     session?.user?.email ? { email: session.user.email } : ("skip" as any)
   );
 
   const isAgent = me?.role === "agent";
+
+  // Redirect customers to their tickets dashboard
+  useEffect(() => {
+    if (me && me.role === "customer") {
+      router.push("/my-tickets");
+    }
+  }, [me, router]);
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">

@@ -123,3 +123,30 @@ export const getAgents = query({
     return agents;
   },
 });
+
+// Fix users with unset roles (utility function)
+export const fixUnsetRoles = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const usersWithUnsetRoles = await ctx.db
+      .query("authUsers")
+      .filter((q) => q.or(
+        q.eq(q.field("role"), "unset"),
+        q.eq(q.field("role"), null),
+        q.eq(q.field("role"), undefined)
+      ))
+      .collect();
+    
+    const updates = [];
+    for (const user of usersWithUnsetRoles) {
+      await ctx.db.patch(user._id, {
+        role: "customer", // Default to customer
+        plan: user.plan === "unset" || user.plan == null ? "free" : user.plan,
+        updatedAt: Date.now(),
+      });
+      updates.push(user._id);
+    }
+    
+    return { fixed: updates.length, userIds: updates };
+  },
+});
