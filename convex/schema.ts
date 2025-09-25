@@ -117,6 +117,7 @@ export default defineSchema({
     ticketId: v.id("tickets"),
     authorId: v.id("authUsers"),
     content: v.string(),
+    messageType: v.optional(v.union(v.literal("human"), v.literal("ai"))), // Distinguish AI vs human messages
     isInternal: v.optional(v.boolean()), // For agent-only notes
     createdAt: v.number(),
   }).index("by_ticket", ["ticketId"]),

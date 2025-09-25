@@ -5,6 +5,7 @@ import { api } from "../../../../convex/_generated/api";
 import { authClient } from "@/lib/auth-client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { AISuggestions } from "@/components/AISuggestions";
 import Link from "next/link";
 import { useState } from "react";
 import { Id } from "../../../../convex/_generated/dataModel";
@@ -46,6 +47,7 @@ export default function TicketDetailPage({ params }: TicketDetailPageProps) {
         ticketId,
         authorId: me._id,
         content: newMessage.trim(),
+        messageType: "human",
         isInternal: false,
       });
       setNewMessage("");
@@ -53,6 +55,16 @@ export default function TicketDetailPage({ params }: TicketDetailPageProps) {
       console.error("Error sending message:", error);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleCopyToManualReply = (text: string) => {
+    setNewMessage(text);
+    // Scroll to the message input area
+    const messageInput = document.querySelector('textarea');
+    if (messageInput) {
+      messageInput.scrollIntoView({ behavior: 'smooth' });
+      messageInput.focus();
     }
   };
 
@@ -204,40 +216,15 @@ export default function TicketDetailPage({ params }: TicketDetailPageProps) {
 
           {/* AI Suggestions (for agents) */}
           {me.role === "agent" && ticket.aiSuggestions && (
-            <Card className="mb-6">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  🤖 AI Suggestions
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {ticket.aiSuggestions.suggestedReply && (
-                    <div>
-                      <h4 className="font-semibold mb-2">Suggested Reply</h4>
-                      <div className="bg-green-50 p-4 rounded-lg">
-                        <p className="text-gray-700 whitespace-pre-wrap">
-                          {ticket.aiSuggestions.suggestedReply}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {ticket.aiSuggestions.relevantDocs && ticket.aiSuggestions.relevantDocs.length > 0 && (
-                    <div>
-                      <h4 className="font-semibold mb-2">Relevant Documentation</h4>
-                      <div className="space-y-2">
-                        {ticket.aiSuggestions.relevantDocs.map((doc, index) => (
-                          <div key={index} className="bg-yellow-50 p-3 rounded">
-                            <p className="text-sm text-gray-700">{doc}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+            <div className="mb-6">
+              <AISuggestions 
+                suggestions={ticket.aiSuggestions}
+                ticketId={ticketId}
+                agentId={me._id}
+                showSendButton={true}
+                onCopyToManualReply={handleCopyToManualReply}
+              />
+            </div>
           )}
 
           {/* Conversation Thread */}
@@ -259,23 +246,30 @@ export default function TicketDetailPage({ params }: TicketDetailPageProps) {
                     >
                       <div
                         className={`max-w-[70%] rounded-lg p-4 ${
-                          message.author?.role === "customer"
+                          message.messageType === "ai"
+                            ? "bg-gradient-to-r from-purple-100 to-blue-100 text-gray-900 border-l-4 border-purple-500"
+                            : message.author?.role === "customer"
                             ? "bg-blue-500 text-white"
                             : "bg-gray-100 text-gray-900"
                         }`}
                       >
                         <div className="flex items-center gap-2 mb-2">
                           <span className="font-semibold text-sm">
-                            {message.author?.name || "Unknown User"}
+                            {message.messageType === "ai" ? "🤖 AI Assistant" : message.author?.name || "Unknown User"}
                           </span>
                           <span className="text-xs opacity-75">
-                            ({message.author?.role})
+                            ({message.messageType === "ai" ? "ai" : message.author?.role})
                           </span>
                           <span className="text-xs opacity-75">
                             {formatDate(message.createdAt)}
                           </span>
                         </div>
                         <p className="whitespace-pre-wrap">{message.content}</p>
+                        {message.messageType === "ai" && (
+                          <div className="mt-2 text-xs text-purple-700 bg-purple-50 px-2 py-1 rounded">
+                            💡 This response was generated by AI and sent by an agent
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))

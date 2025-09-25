@@ -3,6 +3,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { useMutation } from "convex/react";
+import { api } from "../../convex/_generated/api";
+import { Id } from "../../convex/_generated/dataModel";
 
 interface AISuggestionsProps {
   suggestions?: {
@@ -12,10 +15,33 @@ interface AISuggestionsProps {
     relevantDocs?: string[];
   };
   isLoading?: boolean;
+  ticketId?: Id<"tickets">;
+  agentId?: Id<"authUsers">;
+  showSendButton?: boolean;
+  onCopyToManualReply?: (text: string) => void;
 }
 
-export function AISuggestions({ suggestions, isLoading }: AISuggestionsProps) {
+export function AISuggestions({ suggestions, isLoading, ticketId, agentId, showSendButton = false, onCopyToManualReply }: AISuggestionsProps) {
   const [showFullReply, setShowFullReply] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const sendAIReply = useMutation(api.tickets.sendAIReply);
+
+  const handleSendAIReply = async () => {
+    if (!suggestions?.suggestedReply || !ticketId || !agentId || isSending) return;
+    
+    setIsSending(true);
+    try {
+      await sendAIReply({
+        ticketId,
+        agentId,
+        aiSuggestedReply: suggestions.suggestedReply,
+      });
+    } catch (error) {
+      console.error("Error sending AI reply:", error);
+    } finally {
+      setIsSending(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -96,14 +122,27 @@ export function AISuggestions({ suggestions, isLoading }: AISuggestionsProps) {
                 </Button>
               )}
             </div>
-            <div className="flex space-x-2 mt-2">
-              <Button size="sm" variant="outline" className="text-xs">
-                Use This Reply
-              </Button>
-              <Button size="sm" variant="ghost" className="text-xs">
-                Edit & Use
-              </Button>
-            </div>
+            {showSendButton && (
+              <div className="flex space-x-2 mt-2">
+                <Button 
+                  size="sm" 
+                  variant="default" 
+                  className="text-xs bg-blue-600 hover:bg-blue-700"
+                  onClick={handleSendAIReply}
+                  disabled={isSending}
+                >
+                  {isSending ? "Sending..." : "Send as AI Reply"}
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="text-xs"
+                  onClick={() => onCopyToManualReply?.(suggestions.suggestedReply!)}
+                >
+                  Copy to Manual Reply
+                </Button>
+              </div>
+            )}
           </div>
         )}
 

@@ -40,6 +40,7 @@ export interface Message {
   ticketId: string;
   authorId: string;
   content: string;
+  messageType?: "human" | "ai";
   isInternal?: boolean;
   createdAt: number;
 }

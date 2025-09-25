@@ -54,6 +54,9 @@
   - ✅ `/create-ticket` dedicated ticket creation page
 - ✅ **Real-time updates** for customers to see status changes and agent replies
 - ✅ **Message system** for ticket conversations between customers and agents, including AI responses inline
+- ✅ **AI Reply Integration** - Agents can send AI suggestions directly as conversation messages with special styling
+- ✅ **Manual Agent Replies** - Agents can send manual replies independent of AI suggestions
+- ✅ **Copy AI to Manual** - Agents can copy AI suggestions to manual reply input for editing
 - ✅ **Role-based routing** - customers go to `/my-tickets`, agents stay on dashboard
 - ✅ **Navigation system** with proper user context and role-based menus
 - ✅ **Authentication verification** - signup defaults to customer role, role selection works correctly

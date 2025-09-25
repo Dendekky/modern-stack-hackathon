@@ -194,6 +194,7 @@ export const addMessage = mutation({
     ticketId: v.id("tickets"),
     authorId: v.id("authUsers"),
     content: v.string(),
+    messageType: v.optional(v.union(v.literal("human"), v.literal("ai"))),
     isInternal: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
@@ -201,6 +202,7 @@ export const addMessage = mutation({
       ticketId: args.ticketId,
       authorId: args.authorId,
       content: args.content,
+      messageType: args.messageType || "human",
       isInternal: args.isInternal || false,
       createdAt: Date.now(),
     });
@@ -209,6 +211,56 @@ export const addMessage = mutation({
     await ctx.db.patch(args.ticketId, {
       updatedAt: Date.now(),
     });
+    
+    return messageId;
+  },
+});
+
+// Send AI suggestion as a message in the conversation
+export const sendAIReply = mutation({
+  args: {
+    ticketId: v.id("tickets"),
+    agentId: v.id("authUsers"),
+    aiSuggestedReply: v.string(),
+  },
+  handler: async (ctx, args) => {
+    // Verify the agent has permission to send AI replies
+    const agent = await ctx.db.get(args.agentId);
+    if (!agent || agent.role !== "agent") {
+      throw new Error("Only agents can send AI replies");
+    }
+
+    // Add the AI reply as a message in the conversation
+    const messageId = await ctx.db.insert("messages", {
+      ticketId: args.ticketId,
+      authorId: args.agentId,
+      content: args.aiSuggestedReply,
+      messageType: "ai",
+      isInternal: false,
+      createdAt: Date.now(),
+    });
+    
+    // Update ticket's updatedAt timestamp
+    await ctx.db.patch(args.ticketId, {
+      updatedAt: Date.now(),
+    });
+    
+    // Get ticket and customer info for email notification
+    const ticket = await ctx.db.get(args.ticketId);
+    if (ticket) {
+      const customer = await ctx.db.get(ticket.customerId);
+      if (customer && customer.email) {
+        // Send email notification about the AI reply
+        await ctx.scheduler.runAfter(0, api.emails.sendTicketStatusEmail, {
+          to: customer.email,
+          customerName: customer.name || "Customer",
+          ticketId: args.ticketId,
+          ticketTitle: ticket.title,
+          status: ticket.status,
+          agentName: "AI Assistant",
+        });
+      }
+    }
     
     return messageId;
   },
