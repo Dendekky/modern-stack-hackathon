@@ -36,6 +36,7 @@ Build a modern customer support ticketing system with:
 - **Knowledge Base**: Pre-scraped Convex, Resend, and Firecrawl docs provide context.
 - AI reply enriched with relevant snippets from official documentation.
 - Agent sees AI-powered suggestions with "Upgrade to Pro" upsell.
+ - Once sent, AI responses appear in the conversation thread visible to both agents and customers.
  - Customer opens **Ticket Detail** to view live status and conversation timeline.
 
 ### 3. Auth & Roles (Better-Auth)
@@ -70,7 +71,8 @@ Build a modern customer support ticketing system with:
 
 ## 🔧 Customer Portal Enhancements (Robustness)
 - **My Tickets page**: List all customer tickets with status, priority, created/updated times.
-- **Ticket Detail page**: Full conversation (agent messages and AI-authored replies once sent) and AI summary.
+- **Ticket Detail page**: Full conversation thread including customer messages, agent manual replies, and AI responses, plus AI summary.
+- **Agent replies**: Agents can send manual replies independent of AI suggestions/drafts.
 - **Real-time**: Live status and message updates using Convex subscriptions.
 - **Access control**: Only ticket owners can view their tickets and conversations.
 - **Email parity**: In-app views mirror email updates for consistency.

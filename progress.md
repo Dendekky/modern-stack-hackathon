@@ -53,7 +53,7 @@
   - ✅ `/ticket/[id]` individual ticket detail view with conversation thread
   - ✅ `/create-ticket` dedicated ticket creation page
 - ✅ **Real-time updates** for customers to see status changes and agent replies
-- ✅ **Message system** for ticket conversations between customers and agents
+- ✅ **Message system** for ticket conversations between customers and agents, including AI responses inline
 - ✅ **Role-based routing** - customers go to `/my-tickets`, agents stay on dashboard
 - ✅ **Navigation system** with proper user context and role-based menus
 - ✅ **Authentication verification** - signup defaults to customer role, role selection works correctly
@@ -69,6 +69,7 @@
 - ✅ AI enhancements (categorization, priority detection, suggested replies)
 - ✅ Knowledge base integration with document scraping and search
 - ✅ Authentication and roles (Better-Auth email/password, AuthGate, Convex role gating)
+- ✅ AI replies are visible in the conversation for both agents and customers
 - ⏳ Pro feature monetization
 - ⏳ Voice ticketing unlock
 

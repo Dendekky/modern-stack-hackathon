@@ -23,7 +23,7 @@
 ## 2. Core MVP (Convex + Resend)
 - **Convex**
   - Collections: `tickets`, `users`, `teams`.
-  - Real-time subscriptions: `tickets` stream → agent dashboard.
+  - Real-time subscriptions: `tickets` stream → agent dashboard and customer ticket views.
   - Dashboard: Next.js frontend with live ticket list + assignment view.
 - **Resend Integration**
   - **@convex-dev/resend component**: Official Convex-Resend integration with:
@@ -45,6 +45,10 @@
     - Categorize: {priority, type}.
     - Draft suggested reply.
     - Generate conversation summary.
+  - Conversation model:
+    - AI-generated replies, when accepted/sent, are stored as messages in the ticket conversation.
+    - Both agents and customers see AI messages inline in the conversation thread.
+    - Agents can send manual replies independent of AI suggestions at any time.
 - **Firecrawl Knowledge Base**
   - **Pre-scraped Documentation Sources**:
     - Convex docs (docs.convex.dev) → Real-time database, functions, auth
@@ -62,7 +66,7 @@
 ## 4. Auth & Roles (Better-Auth)
 - Role-based access:
   - **Customer**: create tickets, view ticket history.
-  - **Agent**: view team dashboard, assign/reply to tickets.
+  - **Agent**: view team dashboard, assign/reply to tickets (manual replies + optional AI-assisted drafts).
 - Support for organizations/teams:
   - Agents belong to support teams.
   - Tickets assigned by team.

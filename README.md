@@ -2,6 +2,12 @@
 
 A modern customer support ticketing system built with Next.js, Convex, Better-Auth, and Resend.
 
+## Conversation Model
+
+- Agents can send manual replies to tickets at any time, independent of AI suggestions.
+- AI-generated replies, when accepted/sent, appear in the same conversation thread.
+- Both agents and customers see AI responses inline alongside user and agent messages.
+
 ## Environment Variables
 
 Make sure to set up the following environment variables in your `.env.local` file:
