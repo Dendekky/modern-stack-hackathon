@@ -17,7 +17,7 @@ export const sendTicketCreatedEmail = action({
       const resend = new Resend(process.env.RESEND_API_KEY);
 
       const { data, error } = await resend.emails.send({
-        from: 'Support <support@yourdomain.com>',
+        from: 'Support <support@notif.dendekky.com>',
         to: [args.to],
         subject: `Ticket Created: ${args.ticketTitle}`,
         html: `
@@ -86,7 +86,7 @@ export const sendTicketStatusEmail = action({
       const statusMessage = statusMessages[args.status as keyof typeof statusMessages] || `status has been updated to ${args.status}`;
 
       const { data, error } = await resend.emails.send({
-        from: 'Support <support@yourdomain.com>',
+        from: 'Support <support@notif.dendekky.com>',
         to: [args.to],
         subject: `Ticket Update: ${args.ticketTitle}`,
         html: `
@@ -151,7 +151,7 @@ export const sendWelcomeEmail = action({
         : 'Welcome! You can now create support tickets and track their progress.';
 
       const { data, error } = await resend.emails.send({
-        from: 'Support <support@yourdomain.com>',
+        from: 'Support <support@notif.dendekky.com>',
         to: [args.to],
         subject: `Welcome to Support Platform - ${roleText}`,
         html: `
@@ -225,7 +225,7 @@ export const sendSignInNotificationEmail = action({
       const resend = new Resend(process.env.RESEND_API_KEY);
 
       const { data, error } = await resend.emails.send({
-        from: 'Support <support@yourdomain.com>',
+        from: 'Support <support@notif.dendekky.com>',
         to: [args.to],
         subject: 'Sign-in Notification',
         html: `

@@ -34,7 +34,7 @@ export interface SignInEmailData {
 export async function sendTicketCreatedEmail(data: TicketCreatedEmailData) {
   try {
     const { error } = await resend.emails.send({
-      from: 'Support <support@yourdomain.com>',
+      from: 'Support <support@notif.dendekky.com>',
       to: [data.to],
       subject: `Ticket Created: ${data.ticketTitle}`,
       html: `
@@ -82,7 +82,7 @@ export async function sendTicketStatusEmail(data: TicketStatusEmailData) {
     const statusMessage = statusMessages[data.status as keyof typeof statusMessages] || `status has been updated to ${data.status}`;
 
     const { error } = await resend.emails.send({
-      from: 'Support <support@yourdomain.com>',
+      from: 'Support <support@notif.dendekky.com>',
       to: [data.to],
       subject: `Ticket Update: ${data.ticketTitle}`,
       html: `
@@ -127,7 +127,7 @@ export async function sendWelcomeEmail(data: WelcomeEmailData) {
       : 'Welcome! You can now create support tickets and track their progress.';
 
     const { error } = await resend.emails.send({
-      from: 'Support <support@yourdomain.com>',
+      from: 'Support <support@notif.dendekky.com>',
       to: [data.to],
       subject: `Welcome to Support Platform - ${roleText}`,
       html: `
@@ -182,7 +182,7 @@ export async function sendWelcomeEmail(data: WelcomeEmailData) {
 export async function sendSignInNotificationEmail(data: SignInEmailData) {
   try {
     const { error } = await resend.emails.send({
-      from: 'Support <support@yourdomain.com>',
+      from: 'Support <support@notif.dendekky.com>',
       to: [data.to],
       subject: 'Sign-in Notification',
       html: `
