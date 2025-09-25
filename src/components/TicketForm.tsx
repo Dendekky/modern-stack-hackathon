@@ -60,18 +60,18 @@ export function TicketForm() {
   };
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
+    <Card className="w-full max-w-2xl mx-auto shadow-sm">
       <CardHeader>
-        <CardTitle>Create Support Ticket</CardTitle>
-        <CardDescription>
+        <CardTitle className="text-2xl">Create Support Ticket</CardTitle>
+        <CardDescription className="text-lg">
           Describe your issue and we&apos;ll get back to you as soon as possible.
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-              Subject
+            <label htmlFor="title" className="block text-sm font-semibold text-gray-700 mb-2">
+              Subject *
             </label>
             <input
               id="title"
@@ -85,8 +85,8 @@ export function TicketForm() {
           </div>
           
           <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-              Description
+            <label htmlFor="description" className="block text-sm font-semibold text-gray-700 mb-2">
+              Description *
             </label>
             <textarea
               id="description"
@@ -97,14 +97,25 @@ export function TicketForm() {
               placeholder="Please provide detailed information about your issue..."
               required
             />
+            <p className="text-sm text-gray-500 mt-1">
+              Be as specific as possible to help us resolve your issue quickly.
+            </p>
           </div>
           
           <Button 
             type="submit" 
             disabled={isSubmitting || !title.trim() || !description.trim()}
-            className="w-full"
+            className="w-full py-3 text-lg font-medium"
+            size="lg"
           >
-            {isSubmitting ? "Creating Ticket..." : "Create Ticket"}
+            {isSubmitting ? (
+              <div className="flex items-center gap-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                Creating Ticket...
+              </div>
+            ) : (
+              "Create Ticket"
+            )}
           </Button>
         </form>
       </CardContent>

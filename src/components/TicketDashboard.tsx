@@ -3,9 +3,12 @@
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { TicketCard } from "@/components/ui/ticket-card";
+import { Button } from "@/components/ui/button";
 import { TicketStatusUpdater } from "./TicketStatusUpdater";
 import { AISuggestions } from "./AISuggestions";
 import { authClient } from "@/lib/auth-client";
+import Link from "next/link";
 
 export function TicketDashboard() {
   const tickets = useQuery(api.tickets.getAllTickets);
@@ -51,76 +54,52 @@ export function TicketDashboard() {
     <div className="space-y-6">
       <Card className="w-full">
         <CardHeader>
-          <CardTitle>Agent Dashboard</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-2xl">Agent Dashboard</CardTitle>
+          <CardDescription className="text-lg">
             Manage and respond to customer support tickets
           </CardDescription>
         </CardHeader>
         <CardContent>
           {tickets.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              No tickets found. Create a ticket to get started!
+            <div className="text-center py-12">
+              <div className="text-gray-400 mb-4">
+                <svg className="mx-auto h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-medium text-gray-900 mb-2">No tickets found</h3>
+              <p className="text-gray-600 mb-6">Tickets will appear here when customers create them.</p>
+              <Link href="/create-ticket">
+                <Button variant="outline">Create Test Ticket</Button>
+              </Link>
             </div>
           ) : (
             <div className="space-y-6">
               {tickets.map((ticket) => (
-                <div key={ticket._id} className="border rounded-lg p-6 space-y-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-lg mb-1">{ticket.title}</h3>
-                      <p className="text-gray-600 mb-2">{ticket.description}</p>
-                      <div className="flex items-center space-x-4 text-sm text-gray-500">
-                        <span>Customer: {ticket.customer?.name || 'Unknown'}</span>
-                        <span>Created: {new Date(ticket.createdAt).toLocaleDateString()}</span>
-                        {ticket.assignedAgent && (
-                          <span>Assigned: {ticket.assignedAgent.name}</span>
-                        )}
+                <div key={ticket._id} className="space-y-4">
+                  <TicketCard 
+                    ticket={ticket}
+                    showCustomer={true}
+                    showAgent={true}
+                    actions={
+                      <div className="flex flex-col gap-2">
+                        <Link href={`/ticket/${ticket._id}`}>
+                          <Button variant="outline" size="sm" className="w-full">
+                            View Details
+                          </Button>
+                        </Link>
+                        <TicketStatusUpdater
+                          ticketId={ticket._id}
+                          currentStatus={ticket.status}
+                        />
                       </div>
-                    </div>
-                    <div className="ml-4 flex flex-col items-end space-y-2">
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          ticket.status === 'open'
-                            ? 'bg-green-100 text-green-800'
-                            : ticket.status === 'in_progress'
-                            ? 'bg-blue-100 text-blue-800'
-                            : ticket.status === 'resolved'
-                            ? 'bg-gray-100 text-gray-800'
-                            : 'bg-red-100 text-red-800'
-                        }`}
-                      >
-                        {ticket.status.replace('_', ' ').toUpperCase()}
-                      </span>
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          ticket.priority === 'urgent'
-                            ? 'bg-red-100 text-red-800'
-                            : ticket.priority === 'high'
-                            ? 'bg-orange-100 text-orange-800'
-                            : ticket.priority === 'medium'
-                            ? 'bg-yellow-100 text-yellow-800'
-                            : 'bg-green-100 text-green-800'
-                        }`}
-                      >
-                        {ticket.priority.toUpperCase()}
-                      </span>
-                      {ticket.isVoiceTicket && (
-                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                          🎤 VOICE
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <AISuggestions 
-                    suggestions={ticket.aiSuggestions}
-                    isLoading={!ticket.aiSuggestions}
+                    }
                   />
                   
-                  <div className="flex justify-end">
-                    <TicketStatusUpdater
-                      ticketId={ticket._id}
-                      currentStatus={ticket.status}
+                  <div className="ml-6">
+                    <AISuggestions 
+                      suggestions={ticket.aiSuggestions}
+                      isLoading={!ticket.aiSuggestions}
                     />
                   </div>
                 </div>

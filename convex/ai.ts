@@ -64,6 +64,7 @@ Base decisions on the ticket and optional docs.`;
         relevantDocs: relevantDocs.slice(0, 3).map((doc: KnowledgeBaseDoc) => doc.title || doc.url || "Relevant document"),
       };
     } catch (err) {
+      console.error("Error analyzing ticket:", err);
       // Fallback to local heuristic if OpenAI fails
       analysis = await simulateAIAnalysis(
         args.title,
@@ -114,6 +115,7 @@ export const generateSuggestedReply = action({
       const suggestedReply = (response.choices[0]?.message?.content as string) || "";
       return { suggestedReply };
     } catch (err) {
+      console.error("Error generating suggested reply:", err);
       const suggestedReply = await simulateSuggestedReply(
         args.ticketTitle,
         args.ticketDescription,
@@ -179,29 +181,32 @@ async function simulateAIAnalysis(title: string, description: string, relevantDo
   if (titleLower.includes("billing") || descriptionLower.includes("payment") || descriptionLower.includes("invoice")) {
     category = "billing";
     priority = "high";
-    suggestedReply = "Thank you for contacting us about your billing inquiry. I'll review your account details and get back to you within 24 hours with a resolution.";
+    suggestedReply = "Thank you for contacting us about your billing inquiry. I understand how important it is to resolve payment-related issues quickly.\n\nI've reviewed your account and will need to investigate this further. Here's what I can do for you:\n\n1. Review your recent billing history\n2. Check for any processing errors\n3. Verify your payment method is up to date\n\nI'll get back to you within 24 hours with a complete resolution. In the meantime, if you have any urgent concerns, please don't hesitate to reach out.\n\nBest regards,\nCustomer Support Team";
   } else if (titleLower.includes("urgent") || descriptionLower.includes("urgent") || descriptionLower.includes("emergency")) {
     category = "urgent";
     priority = "urgent";
-    suggestedReply = "I understand this is urgent. I'm prioritizing your ticket and will provide an immediate response. Let me investigate this issue right away.";
+    suggestedReply = "I understand this is an urgent matter and I'm treating it with the highest priority.\n\nI've immediately escalated your ticket to our senior support team and will personally ensure this gets resolved as quickly as possible. Here's what's happening next:\n\n1. Senior technician assigned within 15 minutes\n2. Direct phone contact if needed\n3. Real-time updates every 30 minutes until resolved\n\nYou should expect an initial response within the next 15 minutes. Thank you for your patience as we work to resolve this urgently.\n\nBest regards,\nPriority Support Team";
   } else if (titleLower.includes("login") || titleLower.includes("password") || descriptionLower.includes("access")) {
     category = "authentication";
     priority = "high";
-    suggestedReply = "I can help you with your login issue. Please check your email for a password reset link, or let me know if you need additional assistance accessing your account.";
+    suggestedReply = "I'm here to help you regain access to your account quickly and securely.\n\nFor immediate assistance, please try these steps:\n\n1. Check your email for a password reset link (including spam folder)\n2. Clear your browser cache and cookies\n3. Try accessing from an incognito/private browser window\n\nIf these steps don't resolve the issue, I can:\n- Send a new password reset email\n- Verify your account security settings\n- Provide alternative access methods\n\nPlease let me know which step you'd like to try first, and I'll guide you through the process.\n\nBest regards,\nSecurity Support Team";
   } else if (titleLower.includes("bug") || titleLower.includes("error") || descriptionLower.includes("not working")) {
     category = "technical";
     priority = "high";
-    suggestedReply = "Thank you for reporting this technical issue. I've escalated this to our development team and will keep you updated on the progress. In the meantime, here are some potential workarounds...";
+    suggestedReply = "Thank you for reporting this technical issue. I take bug reports seriously as they help us improve our service for everyone.\n\nI've documented the following details from your report:\n- Issue description: " + description.substring(0, 100) + "...\n- Priority level: High\n- Assigned to: Development Team\n\nImmediate next steps:\n1. Our QA team will reproduce the issue\n2. Development team will create a fix\n3. You'll receive updates every 24 hours\n\nAs a temporary workaround, you might try:\n- Refreshing the page\n- Using a different browser\n- Clearing your cache\n\nI'll keep you updated on our progress. Thank you for helping us improve!\n\nBest regards,\nTechnical Support Team";
   } else if (titleLower.includes("feature") || titleLower.includes("request") || descriptionLower.includes("suggestion")) {
     category = "feature_request";
     priority = "low";
-    suggestedReply = "Thank you for your feature suggestion! I'll forward this to our product team for consideration. We appreciate your feedback in helping us improve our service.";
+    suggestedReply = "Thank you for taking the time to share your feature suggestion! Customer feedback like yours is invaluable in shaping our product roadmap.\n\nI've forwarded your request to our Product Team with the following details:\n- Feature request: " + title + "\n- Business case: " + description.substring(0, 100) + "...\n- Priority: Added to backlog for evaluation\n\nOur product team reviews all feature requests during our monthly planning sessions. While I can't guarantee implementation, your suggestion will be seriously considered alongside user demand and technical feasibility.\n\nYou'll receive an email update if this feature is scheduled for development. Thank you for helping us build a better product!\n\nBest regards,\nProduct Support Team";
+  } else {
+    // Default general response
+    suggestedReply = "Thank you for reaching out to our support team. I've received your inquiry and want to ensure you get the help you need.\n\nBased on your message about \"" + title + "\", I understand you're looking for assistance with this matter. Here's how I can help:\n\n1. I'll review your account and any relevant information\n2. Research the best solution for your specific situation\n3. Provide you with clear, actionable next steps\n\nI aim to respond with a complete solution within 24 hours. If your issue is time-sensitive, please let me know and I can prioritize accordingly.\n\nIs there any additional context or specific details that might help me assist you better?\n\nBest regards,\nCustomer Support Team";
   }
 
   // Enhance reply with knowledge base context
   if (relevantDocs.length > 0) {
     const docTitles = relevantDocs.map((doc) => doc.title ?? "Relevant document");
-    suggestedReply += `\n\nI found some relevant documentation that might help: ${docTitles.join(", ")}. Let me provide you with the specific information from our knowledge base.`;
+    suggestedReply += `\n\n📚 I found some relevant documentation that might help: ${docTitles.join(", ")}. Let me provide you with the specific information from our knowledge base that relates to your inquiry.`;
   }
 
   return {
