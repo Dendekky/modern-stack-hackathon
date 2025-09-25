@@ -40,6 +40,7 @@
 - ✅ AI suggestions enhanced with relevant document snippets from knowledge base
 - ✅ Demo knowledge base pre-populated with Convex, Resend, and Firecrawl documentation
 - ✅ Updated project plan and technical docs to reflect knowledge base strategy
+- ✅ **Better Auth persistent storage with Convex adapter** - Users now persist across restarts
 
 ## 📋 Next Steps
 1. **Autumn Integration** - Pro plan monetization
@@ -57,6 +58,7 @@
 
 ## 🛠️ Technical Notes
 - Using Convex for real-time backend with local development setup
+- Better Auth now uses custom Convex adapter for persistent user storage
 - shadcn/ui components provide consistent, accessible UI
 - TypeScript strict mode for type safety
 - Responsive design with TailwindCSS utilities

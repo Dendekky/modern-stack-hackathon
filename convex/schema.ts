@@ -10,6 +10,71 @@ export default defineSchema({
     createdAt: v.number(),
   }).index("by_email", ["email"]),
 
+  authUsers: defineTable({
+    id: v.string(),
+    email: v.optional(v.string()),
+    emailVerified: v.optional(v.boolean()),
+    name: v.optional(v.union(v.string(), v.null())),
+    image: v.optional(v.union(v.string(), v.null())),
+    role: v.optional(v.union(v.string(), v.null())),
+    plan: v.optional(v.union(v.string(), v.null())),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    metadata: v.optional(v.any()),
+  })
+    .index("by_email", ["email"]),
+
+  authSessions: defineTable({
+    id: v.string(),
+    userId: v.string(),
+    token: v.string(),
+    expiresAt: v.number(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    ipAddress: v.optional(v.union(v.string(), v.null())),
+    userAgent: v.optional(v.union(v.string(), v.null())),
+  })
+    .index("by_token", ["token"])
+    .index("by_user", ["userId"]),
+
+  authAccounts: defineTable({
+    id: v.string(),
+    userId: v.string(),
+    providerId: v.string(),
+    accountId: v.string(),
+    accessToken: v.optional(v.union(v.string(), v.null())),
+    refreshToken: v.optional(v.union(v.string(), v.null())),
+    idToken: v.optional(v.union(v.string(), v.null())),
+    accessTokenExpiresAt: v.optional(v.number()),
+    refreshTokenExpiresAt: v.optional(v.number()),
+    scope: v.optional(v.union(v.string(), v.null())),
+    password: v.optional(v.union(v.string(), v.null())),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_provider_account", ["providerId", "accountId"]),
+
+  authVerifications: defineTable({
+    id: v.string(),
+    identifier: v.string(),
+    value: v.string(),
+    expiresAt: v.number(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_identifier_value", ["identifier", "value"]),
+
+  authRateLimits: defineTable({
+    id: v.string(),
+    identifier: v.string(),
+    window: v.number(),
+    hits: v.number(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_identifier_window", ["identifier", "window"]),
+
   teams: defineTable({
     name: v.string(),
     description: v.optional(v.string()),
