@@ -16,7 +16,7 @@ export default defineSchema({
     updatedAt: v.number(),
     metadata: v.optional(v.any()),
   })
-    .index("by_id", ["id"])
+    .index("by_user_id", ["id"])
     .index("by_email", ["email"])
     .index("by_role", ["role"]),
 

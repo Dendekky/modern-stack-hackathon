@@ -20,6 +20,7 @@ import type * as demoKnowledgeBase from "../demoKnowledgeBase.js";
 import type * as emails from "../emails.js";
 import type * as firecrawl from "../firecrawl.js";
 import type * as knowledgeBase from "../knowledgeBase.js";
+import type * as migration from "../migration.js";
 import type * as tickets from "../tickets.js";
 import type * as users from "../users.js";
 
@@ -39,6 +40,7 @@ declare const fullApi: ApiFromModules<{
   emails: typeof emails;
   firecrawl: typeof firecrawl;
   knowledgeBase: typeof knowledgeBase;
+  migration: typeof migration;
   tickets: typeof tickets;
   users: typeof users;
 }>;

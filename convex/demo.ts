@@ -6,7 +6,7 @@ export const seedDemoData = mutation({
   handler: async (ctx) => {
     // Check if demo data already exists
     const existingAgent = await ctx.db
-      .query("users")
+      .query("authUsers")
       .filter((q) => q.eq(q.field("email"), "agent@demo.com"))
       .first();
     
@@ -15,28 +15,34 @@ export const seedDemoData = mutation({
     }
 
     // Create demo agent users
-    const agent1 = await ctx.db.insert("users", {
+    const agent1 = await ctx.db.insert("authUsers", {
+      id: crypto.randomUUID(),
       email: "agent@demo.com",
       name: "Demo Agent",
       role: "agent",
       plan: "pro",
       createdAt: Date.now(),
+      updatedAt: Date.now(),
     });
 
-    const agent2 = await ctx.db.insert("users", {
+    const agent2 = await ctx.db.insert("authUsers", {
+      id: crypto.randomUUID(),
       email: "sarah.agent@demo.com",
       name: "Sarah Wilson",
       role: "agent",
       plan: "pro",
       createdAt: Date.now(),
+      updatedAt: Date.now(),
     });
 
-    const agent3 = await ctx.db.insert("users", {
+    const agent3 = await ctx.db.insert("authUsers", {
+      id: crypto.randomUUID(),
       email: "mike.agent@demo.com",
       name: "Mike Johnson",
       role: "agent",
       plan: "pro",
       createdAt: Date.now(),
+      updatedAt: Date.now(),
     });
 
     // Create a demo team

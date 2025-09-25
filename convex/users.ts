@@ -12,7 +12,7 @@ export const updateUserProfile = mutation({
     // Find user by Better Auth ID
     const user = await ctx.db
       .query("authUsers")
-      .withIndex("by_id", (q) => q.eq("id", args.userId))
+      .withIndex("by_user_id", (q) => q.eq("id", args.userId))
       .first();
     
     if (!user) {
@@ -49,7 +49,7 @@ export const getUserById = query({
   handler: async (ctx, args) => {
     const user = await ctx.db
       .query("authUsers")
-      .withIndex("by_id", (q) => q.eq("id", args.userId))
+      .withIndex("by_user_id", (q) => q.eq("id", args.userId))
       .first();
     
     return user;
@@ -74,7 +74,7 @@ export const updateUserPlan = mutation({
   handler: async (ctx, args) => {
     const user = await ctx.db
       .query("authUsers")
-      .withIndex("by_id", (q) => q.eq("id", args.userId))
+      .withIndex("by_user_id", (q) => q.eq("id", args.userId))
       .first();
     
     if (!user) {
@@ -97,7 +97,7 @@ export const updateUserRole = mutation({
   handler: async (ctx, args) => {
     const user = await ctx.db
       .query("authUsers")
-      .withIndex("by_id", (q) => q.eq("id", args.userId))
+      .withIndex("by_user_id", (q) => q.eq("id", args.userId))
       .first();
     
     if (!user) {

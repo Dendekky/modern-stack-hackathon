@@ -4,7 +4,7 @@ import { ReactNode, useEffect, useMemo, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useMutation, useQuery } from "convex/react";
+import { useMutation, useQuery, useAction } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 
 export function AuthGate({ children }: { children: ReactNode }) {
@@ -15,6 +15,9 @@ export function AuthGate({ children }: { children: ReactNode }) {
     session?.user?.email ? { email: session.user.email } : ("skip" as any)
   );
 
+  const sendWelcomeEmail = useAction(api.emails.sendWelcomeEmail);
+  const sendSignInEmail = useAction(api.emails.sendSignInNotificationEmail);
+
   useEffect(() => {
     if (session?.user?.id && getUser === null) {
       // Set default role for new users (Better Auth handles user creation)
@@ -23,8 +26,28 @@ export function AuthGate({ children }: { children: ReactNode }) {
         role: "customer",
         plan: "free",
       }).catch(() => {});
+
+      // Send welcome email for new users
+      if (session?.user?.email && session?.user?.name) {
+        sendWelcomeEmail({
+          to: session.user.email,
+          name: session.user.name,
+          role: "customer", // Default role for new signups
+        }).catch((e) => {
+          console.error("Error sending welcome email:", e);
+        });
+      }
+    } else if (session?.user?.id && getUser && session?.user?.email && session?.user?.name) {
+      // Send signin notification for existing users
+      sendSignInEmail({
+        to: session.user.email,
+        name: session.user.name,
+        loginTime: new Date().toLocaleString(),
+      }).catch((e) => {
+        console.error("Error sending signin notification email:", e);
+      });
     }
-  }, [session?.user?.id, getUser, updateUserProfile]);
+  }, [session?.user?.id, getUser, updateUserProfile, sendWelcomeEmail, sendSignInEmail]);
 
   if (isPending) {
     return (
@@ -60,6 +83,8 @@ function AuthForm() {
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const updateUserProfile = useMutation(api.users.updateUserProfile);
+  const sendWelcomeEmail = useAction(api.emails.sendWelcomeEmail);
+  const sendSignInEmail = useAction(api.emails.sendSignInNotificationEmail);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,6 +104,20 @@ function AuthForm() {
           throw data;
         }
         (authClient as any).$store.notify("$sessionSignal");
+
+        // Send signin notification email
+        // We'll get the user's name from the session after signin
+        setTimeout(() => {
+          if (normalizedEmail) {
+            sendSignInEmail({
+              to: normalizedEmail,
+              name: "User", // Fallback name, will be updated when session loads
+              loginTime: new Date().toLocaleString(),
+            }).catch((e) => {
+              console.error("Error sending signin notification email:", e);
+            });
+          }
+        }, 1000);
       } else {
         const res = await fetch(`/api/auth/sign-up/email`, {
           method: "POST",
@@ -92,6 +131,17 @@ function AuthForm() {
         // Better Auth handles user creation, we'll set the profile after sign-up
         // Profile will be set via the useEffect above when session is established
         (authClient as any).$store.notify("$sessionSignal");
+
+        // Send welcome email for new signup
+        if (name && normalizedEmail) {
+          sendWelcomeEmail({
+            to: normalizedEmail,
+            name: name,
+            role: role,
+          }).catch((e) => {
+            console.error("Error sending welcome email:", e);
+          });
+        }
       }
     } catch (err: any) {
       const code = err?.data?.code || err?.code;
