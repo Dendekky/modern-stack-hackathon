@@ -9,22 +9,22 @@ import { api } from "../../../convex/_generated/api";
 
 export function AuthGate({ children }: { children: ReactNode }) {
   const { data: session, isPending, error } = authClient.useSession();
-  const createUser = useMutation(api.users.createUser);
+  const updateUserProfile = useMutation(api.users.updateUserProfile);
   const getUser = useQuery(
     api.users.getUserByEmail,
     session?.user?.email ? { email: session.user.email } : ("skip" as any)
   );
 
   useEffect(() => {
-    if (session?.user?.email && getUser === null) {
-      // ensure convex user exists as customer by default
-      createUser({
-        email: session.user.email,
-        name: session.user.name || session.user.email,
+    if (session?.user?.id && getUser === null) {
+      // Set default role for new users (Better Auth handles user creation)
+      updateUserProfile({
+        userId: session.user.id,
         role: "customer",
+        plan: "free",
       }).catch(() => {});
     }
-  }, [session?.user?.email, session?.user?.name, getUser, createUser]);
+  }, [session?.user?.id, getUser, updateUserProfile]);
 
   if (isPending) {
     return (
@@ -59,7 +59,7 @@ function AuthForm() {
   const [role, setRole] = useState<"customer" | "agent">("customer");
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
-  const createUser = useMutation(api.users.createUser);
+  const updateUserProfile = useMutation(api.users.updateUserProfile);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -89,7 +89,8 @@ function AuthForm() {
           const data = await res.json().catch(() => ({}));
           throw data;
         }
-        await createUser({ email: normalizedEmail, name: name || normalizedEmail, role });
+        // Better Auth handles user creation, we'll set the profile after sign-up
+        // Profile will be set via the useEffect above when session is established
         (authClient as any).$store.notify("$sessionSignal");
       }
     } catch (err: any) {

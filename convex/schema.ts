@@ -2,27 +2,23 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
 export default defineSchema({
-  users: defineTable({
-    email: v.string(),
-    name: v.string(),
-    role: v.union(v.literal("customer"), v.literal("agent")),
-    plan: v.optional(v.union(v.literal("free"), v.literal("pro"))),
-    createdAt: v.number(),
-  }).index("by_email", ["email"]),
-
+  // Consolidated user table (used by Better Auth and application)
   authUsers: defineTable({
     id: v.string(),
     email: v.optional(v.string()),
     emailVerified: v.optional(v.boolean()),
     name: v.optional(v.union(v.string(), v.null())),
     image: v.optional(v.union(v.string(), v.null())),
-    role: v.optional(v.union(v.string(), v.null())),
-    plan: v.optional(v.union(v.string(), v.null())),
+    // Application-specific fields with proper typing
+    role: v.optional(v.union(v.literal("customer"), v.literal("agent"), v.null())),
+    plan: v.optional(v.union(v.literal("free"), v.literal("pro"), v.null())),
     createdAt: v.number(),
     updatedAt: v.number(),
     metadata: v.optional(v.any()),
   })
-    .index("by_email", ["email"]),
+    .index("by_id", ["id"])
+    .index("by_email", ["email"])
+    .index("by_role", ["role"]),
 
   authSessions: defineTable({
     id: v.string(),
@@ -97,8 +93,8 @@ export default defineSchema({
       v.literal("urgent")
     ),
     category: v.optional(v.string()),
-    customerId: v.id("users"),
-    assignedAgentId: v.optional(v.id("users")),
+    customerId: v.id("authUsers"),
+    assignedAgentId: v.optional(v.id("authUsers")),
     teamId: v.optional(v.id("teams")),
     createdAt: v.number(),
     updatedAt: v.number(),
@@ -119,7 +115,7 @@ export default defineSchema({
 
   messages: defineTable({
     ticketId: v.id("tickets"),
-    authorId: v.id("users"),
+    authorId: v.id("authUsers"),
     content: v.string(),
     isInternal: v.optional(v.boolean()), // For agent-only notes
     createdAt: v.number(),

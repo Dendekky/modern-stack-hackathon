@@ -1,35 +1,32 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 
-// Create or get a user
-export const createUser = mutation({
+// Update user profile (role/plan) - Better Auth handles user creation
+export const updateUserProfile = mutation({
   args: {
-    email: v.string(),
-    name: v.string(),
-    role: v.union(v.literal("customer"), v.literal("agent")),
+    userId: v.string(), // Better Auth uses string IDs
+    role: v.optional(v.union(v.literal("customer"), v.literal("agent"))),
     plan: v.optional(v.union(v.literal("free"), v.literal("pro"))),
   },
   handler: async (ctx, args) => {
-    // Check if user already exists
-    const existingUser = await ctx.db
-      .query("users")
-      .withIndex("by_email", (q) => q.eq("email", args.email))
+    // Find user by Better Auth ID
+    const user = await ctx.db
+      .query("authUsers")
+      .withIndex("by_id", (q) => q.eq("id", args.userId))
       .first();
     
-    if (existingUser) {
-      return existingUser._id;
+    if (!user) {
+      throw new Error("User not found");
     }
     
-    // Create new user
-    const userId = await ctx.db.insert("users", {
-      email: args.email,
-      name: args.name,
+    // Update user profile
+    await ctx.db.patch(user._id, {
       role: args.role,
-      plan: args.plan || "free",
-      createdAt: Date.now(),
+      plan: args.plan,
+      updatedAt: Date.now(),
     });
     
-    return userId;
+    return user._id;
   },
 });
 
@@ -38,7 +35,7 @@ export const getUserByEmail = query({
   args: { email: v.string() },
   handler: async (ctx, args) => {
     const user = await ctx.db
-      .query("users")
+      .query("authUsers")
       .withIndex("by_email", (q) => q.eq("email", args.email))
       .first();
     
@@ -46,11 +43,24 @@ export const getUserByEmail = query({
   },
 });
 
-// Get user by ID
+// Get user by Better Auth ID
 export const getUserById = query({
-  args: { userId: v.id("users") },
+  args: { userId: v.string() },
   handler: async (ctx, args) => {
-    const user = await ctx.db.get(args.userId);
+    const user = await ctx.db
+      .query("authUsers")
+      .withIndex("by_id", (q) => q.eq("id", args.userId))
+      .first();
+    
+    return user;
+  },
+});
+
+// Get user by Convex document ID
+export const getUserByDocId = query({
+  args: { docId: v.id("authUsers") },
+  handler: async (ctx, args) => {
+    const user = await ctx.db.get(args.docId);
     return user;
   },
 });
@@ -58,12 +68,22 @@ export const getUserById = query({
 // Update user plan (for monetization)
 export const updateUserPlan = mutation({
   args: {
-    userId: v.id("users"),
+    userId: v.string(), // Better Auth ID
     plan: v.union(v.literal("free"), v.literal("pro")),
   },
   handler: async (ctx, args) => {
-    await ctx.db.patch(args.userId, {
+    const user = await ctx.db
+      .query("authUsers")
+      .withIndex("by_id", (q) => q.eq("id", args.userId))
+      .first();
+    
+    if (!user) {
+      throw new Error("User not found");
+    }
+    
+    await ctx.db.patch(user._id, {
       plan: args.plan,
+      updatedAt: Date.now(),
     });
   },
 });
@@ -71,12 +91,22 @@ export const updateUserPlan = mutation({
 // Update user role
 export const updateUserRole = mutation({
   args: {
-    userId: v.id("users"),
+    userId: v.string(), // Better Auth ID
     role: v.union(v.literal("customer"), v.literal("agent")),
   },
   handler: async (ctx, args) => {
-    await ctx.db.patch(args.userId, {
+    const user = await ctx.db
+      .query("authUsers")
+      .withIndex("by_id", (q) => q.eq("id", args.userId))
+      .first();
+    
+    if (!user) {
+      throw new Error("User not found");
+    }
+    
+    await ctx.db.patch(user._id, {
       role: args.role,
+      updatedAt: Date.now(),
     });
   },
 });
@@ -86,8 +116,8 @@ export const getAgents = query({
   args: {},
   handler: async (ctx) => {
     const agents = await ctx.db
-      .query("users")
-      .filter((q) => q.eq(q.field("role"), "agent"))
+      .query("authUsers")
+      .withIndex("by_role", (q) => q.eq("role", "agent"))
       .collect();
     
     return agents;

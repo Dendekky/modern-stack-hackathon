@@ -7,7 +7,7 @@ export const createTicket = mutation({
   args: {
     title: v.string(),
     description: v.string(),
-    customerId: v.id("users"),
+    customerId: v.id("authUsers"),
     priority: v.optional(v.union(v.literal("low"), v.literal("medium"), v.literal("high"), v.literal("urgent"))),
     category: v.optional(v.string()),
     isVoiceTicket: v.optional(v.boolean()),
@@ -89,7 +89,7 @@ export const getAllTickets = query({
 
 // Get tickets for a specific customer
 export const getCustomerTickets = query({
-  args: { customerId: v.id("users") },
+  args: { customerId: v.id("authUsers") },
   handler: async (ctx, args) => {
     const tickets = await ctx.db
       .query("tickets")
@@ -106,7 +106,7 @@ export const updateTicketStatus = mutation({
   args: {
     ticketId: v.id("tickets"),
     status: v.union(v.literal("open"), v.literal("in_progress"), v.literal("resolved"), v.literal("closed")),
-    assignedAgentId: v.optional(v.id("users")),
+    assignedAgentId: v.optional(v.id("authUsers")),
   },
   handler: async (ctx, args) => {
     const ticket = await ctx.db.get(args.ticketId);

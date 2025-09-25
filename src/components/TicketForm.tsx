@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
@@ -14,7 +14,10 @@ export function TicketForm() {
   const { data: session } = authClient.useSession();
   
   const createTicket = useMutation(api.tickets.createTicket);
-  const createUser = useMutation(api.users.createUser);
+  const getUserByEmail = useQuery(
+    api.users.getUserByEmail,
+    session?.user?.email ? { email: session.user.email } : "skip"
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,26 +25,17 @@ export function TicketForm() {
 
     setIsSubmitting(true);
     try {
-      // If signed in, use session user; otherwise create a demo customer
-      let customerId: string;
-      if (session?.user?.email) {
-        customerId = await createUser({
-          email: session.user.email,
-          name: session.user.name || session.user.email,
-          role: "customer",
-        });
-      } else {
-        customerId = await createUser({
-          email: "customer@demo.com",
-          name: "Demo Customer",
-          role: "customer",
-        });
+      // Must be signed in to create tickets now
+      if (!session?.user?.email || !getUserByEmail?._id) {
+        alert("Please sign in to create a ticket.");
+        setIsSubmitting(false);
+        return;
       }
 
       await createTicket({
         title: title.trim(),
         description: description.trim(),
-        customerId,
+        customerId: getUserByEmail._id,
         priority: "medium",
       });
 

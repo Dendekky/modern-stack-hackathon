@@ -7,27 +7,19 @@ import { api } from "../../../convex/_generated/api";
 
 export function AuthHeader() {
   const { data: session, isPending } = authClient.useSession();
-  const createUser = useMutation(api.users.createUser);
+  const updateUserProfile = useMutation(api.users.updateUserProfile);
   const updateUserRole = useMutation(api.users.updateUserRole);
 
   const ensureConvexUser = async (role: "customer" | "agent") => {
-    if (!session?.user?.email) return;
-    const userId = await createUser({
-      email: session.user.email,
-      name: session.user.name || session.user.email,
+    if (!session?.user?.id) return;
+    await updateUserProfile({
+      userId: session.user.id,
       role,
+      plan: "free",
     });
-    await updateUserRole({ userId, role });
   };
 
-  // Ensure a Convex user exists after sign-in (without changing role)
-  if (session?.user?.email) {
-    createUser({
-      email: session.user.email,
-      name: session.user.name || session.user.email,
-      role: "customer",
-    }).catch(() => {});
-  }
+  // No need to create users - Better Auth handles that automatically
 
   return (
     <header className="border-b bg-white/60 backdrop-blur supports-[backdrop-filter]:bg-white/40">
