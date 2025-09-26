@@ -16,7 +16,6 @@ import type {
 import type * as ai from "../ai.js";
 import type * as authPersistence from "../authPersistence.js";
 import type * as demo from "../demo.js";
-import type * as demoKnowledgeBase from "../demoKnowledgeBase.js";
 import type * as emails from "../emails.js";
 import type * as firecrawl from "../firecrawl.js";
 import type * as knowledgeBase from "../knowledgeBase.js";
@@ -36,7 +35,6 @@ declare const fullApi: ApiFromModules<{
   ai: typeof ai;
   authPersistence: typeof authPersistence;
   demo: typeof demo;
-  demoKnowledgeBase: typeof demoKnowledgeBase;
   emails: typeof emails;
   firecrawl: typeof firecrawl;
   knowledgeBase: typeof knowledgeBase;

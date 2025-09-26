@@ -5,7 +5,6 @@ import { api } from "../../convex/_generated/api";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { TicketCard } from "@/components/ui/ticket-card";
 import { Button } from "@/components/ui/button";
-import { TicketStatusUpdater } from "./TicketStatusUpdater";
 import { AISuggestions } from "./AISuggestions";
 import { authClient } from "@/lib/auth-client";
 import Link from "next/link";
@@ -103,19 +102,8 @@ export function TicketDashboard() {
                   ticket={ticket}
                   showCustomer={true}
                   showAgent={true}
-                  actions={
-                    <div className="flex items-center gap-3">
-                      <Link href={`/ticket/${ticket._id}`}>
-                        <Button variant="outline" size="sm" className="bg-white hover:bg-gray-50">
-                          View Details
-                        </Button>
-                      </Link>
-                      <TicketStatusUpdater
-                        ticketId={ticket._id}
-                        currentStatus={ticket.status}
-                      />
-                    </div>
-                  }
+                  showStatusDropdown={true}
+                  actions={null}
                 />
                 
                 {/* AI Suggestions */}

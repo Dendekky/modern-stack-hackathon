@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useMutation, useAction } from "convex/react";
+import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,13 +9,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 export function DemoSetup() {
   const [isSeeding, setIsSeeding] = useState(false);
   const [isSeeded, setIsSeeded] = useState(false);
-  const [isKnowledgeBaseSeeding, setIsKnowledgeBaseSeeding] = useState(false);
-  const [isKnowledgeBaseSeeded, setIsKnowledgeBaseSeeded] = useState(false);
   const [isFixingRoles, setIsFixingRoles] = useState(false);
   const [rolesFixed, setRolesFixed] = useState(false);
   
   const seedDemoData = useMutation(api.demo.seedDemoData);
-  const setupDemoKnowledgeBase = useAction(api.demoKnowledgeBase.setupDemoKnowledgeBase);
   const fixUnsetRoles = useMutation(api.users.fixUnsetRoles);
 
   const handleSeedData = async () => {
@@ -31,18 +28,6 @@ export function DemoSetup() {
     }
   };
 
-  const handleSetupKnowledgeBase = async () => {
-    setIsKnowledgeBaseSeeding(true);
-    try {
-      const result = await setupDemoKnowledgeBase({});
-      console.log("Demo knowledge base setup:", result);
-      setIsKnowledgeBaseSeeded(true);
-    } catch (error) {
-      console.error("Error setting up knowledge base:", error);
-    } finally {
-      setIsKnowledgeBaseSeeding(false);
-    }
-  };
 
   const handleFixRoles = async () => {
     setIsFixingRoles(true);
@@ -59,12 +44,12 @@ export function DemoSetup() {
     }
   };
 
-  if (isSeeded && isKnowledgeBaseSeeded) {
+  if (isSeeded) {
     return (
       <Card className="border-green-200 bg-green-50">
         <CardContent className="p-4">
           <div className="flex items-center text-green-800">
-            ✅ Demo ready! Agents and knowledge base (Convex, Resend, Firecrawl docs) are set up.
+            ✅ Demo ready! Agents are set up and ready to handle tickets.
           </div>
         </CardContent>
       </Card>
@@ -90,14 +75,6 @@ export function DemoSetup() {
             {isSeeding ? "Setting up..." : isSeeded ? "✅ Agents Ready" : "Setup Demo Agents"}
           </Button>
           <Button
-            onClick={handleSetupKnowledgeBase}
-            disabled={isKnowledgeBaseSeeding || isKnowledgeBaseSeeded}
-            variant="outline"
-            className="border-yellow-300 text-yellow-800 hover:bg-yellow-100"
-          >
-            {isKnowledgeBaseSeeding ? "Loading docs..." : isKnowledgeBaseSeeded ? "✅ Docs Loaded" : "Load Knowledge Base"}
-          </Button>
-          <Button
             onClick={handleFixRoles}
             disabled={isFixingRoles || rolesFixed}
             variant="outline"
@@ -107,7 +84,7 @@ export function DemoSetup() {
           </Button>
         </div>
         <p className="text-xs text-yellow-700 mt-3">
-          Knowledge base includes Convex, Resend, and Firecrawl documentation for realistic AI responses.<br />
+          Use Firecrawl integration to scrape documentation and build your knowledge base dynamically.<br />
           <strong>Fix User Roles</strong> if you see "unset" roles in the database.
         </p>
       </CardContent>

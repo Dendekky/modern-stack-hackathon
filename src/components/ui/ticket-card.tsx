@@ -1,10 +1,13 @@
 import * as React from "react";
 import Link from "next/link";
+import { useMutation } from "convex/react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatDate, formatStatus, cn } from "@/lib/ui-utils";
 import { Id } from "../../../convex/_generated/dataModel";
+import { api } from "../../../convex/_generated/api";
+import type { TicketStatus } from "@/types";
 
 interface TicketCardProps {
   ticket: any; // Use any to handle different ticket structures from different queries
@@ -12,6 +15,7 @@ interface TicketCardProps {
   showAgent?: boolean;
   actions?: React.ReactNode;
   className?: string;
+  showStatusDropdown?: boolean;
 }
 
 export function TicketCard({ 
@@ -19,8 +23,31 @@ export function TicketCard({
   showCustomer = false, 
   showAgent = false, 
   actions,
-  className 
+  className,
+  showStatusDropdown = false 
 }: TicketCardProps) {
+  const updateTicketStatus = useMutation(api.tickets.updateTicketStatus);
+
+  const statusOptions: { value: TicketStatus; label: string }[] = [
+    { value: "open", label: "Open" },
+    { value: "in_progress", label: "In Progress" },
+    { value: "resolved", label: "Resolved" },
+    { value: "closed", label: "Closed" },
+  ];
+
+  const handleStatusChange = async (newStatus: TicketStatus) => {
+    if (newStatus === ticket.status) return;
+    
+    try {
+      await updateTicketStatus({
+        ticketId: ticket._id as Id<"tickets">,
+        status: newStatus,
+      });
+    } catch (error) {
+      console.error("Error updating ticket status:", error);
+    }
+  };
+
   const statusColor = {
     open: "bg-blue-50 text-blue-700 border-blue-200",
     in_progress: "bg-yellow-50 text-yellow-700 border-yellow-200",
@@ -79,15 +106,33 @@ export function TicketCard({
             </div>
           </div>
 
-          {/* Title */}
-          <Link 
-            href={`/ticket/${ticket._id}`}
-            className="block mb-3 group-hover:text-blue-600 transition-colors duration-200"
-          >
-            <h3 className="text-lg font-semibold text-gray-900 line-clamp-2 leading-6">
-              {ticket.title}
-            </h3>
-          </Link>
+          {/* Title and Status Dropdown */}
+          <div className="mb-3 flex items-start justify-between gap-4">
+            <Link 
+              href={`/ticket/${ticket._id}`}
+              className="flex-1 group-hover:text-blue-600 transition-colors duration-200"
+            >
+              <h3 className="text-lg font-semibold text-gray-900 line-clamp-2 leading-6">
+                {ticket.title}
+              </h3>
+            </Link>
+            
+            {showStatusDropdown && (
+              <div className="flex-shrink-0">
+                <select
+                  value={ticket.status}
+                  onChange={(e) => handleStatusChange(e.target.value as TicketStatus)}
+                  className="px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                >
+                  {statusOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+          </div>
           
           {/* Description */}
           <p className="text-gray-600 text-sm leading-relaxed mb-4 line-clamp-2">
