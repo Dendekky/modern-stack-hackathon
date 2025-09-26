@@ -14,6 +14,19 @@ export const createTicket = mutation({
     voiceTranscript: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    // Auto-assign to an available agent
+    const agents = await ctx.db
+      .query("authUsers")
+      .withIndex("by_role", (q) => q.eq("role", "agent"))
+      .collect();
+    
+    let assignedAgentId = undefined;
+    if (agents.length > 0) {
+      // For now, assign to the first available agent
+      // In the future, this could be more sophisticated (round-robin, workload-based, etc.)
+      assignedAgentId = agents[0]._id;
+    }
+
     const ticketId = await ctx.db.insert("tickets", {
       title: args.title,
       description: args.description,
@@ -21,6 +34,7 @@ export const createTicket = mutation({
       priority: args.priority || "medium",
       category: args.category,
       customerId: args.customerId,
+      assignedAgentId,
       createdAt: Date.now(),
       updatedAt: Date.now(),
       isVoiceTicket: args.isVoiceTicket || false,
@@ -59,15 +73,17 @@ export const createTicket = mutation({
 
 // Get all tickets (for agent dashboard)
 export const getAllTickets = query({
-  args: {},
-  handler: async (ctx) => {
+  args: {
+    currentUserId: v.optional(v.id("authUsers")),
+  },
+  handler: async (ctx, args) => {
     const tickets = await ctx.db
       .query("tickets")
       .withIndex("by_created_at")
       .order("desc")
       .collect();
     
-    // Enrich with customer information
+    // Enrich with customer information and message count
     const enrichedTickets = await Promise.all(
       tickets.map(async (ticket) => {
         const customer = await ctx.db.get(ticket.customerId);
@@ -75,10 +91,37 @@ export const getAllTickets = query({
           ? await ctx.db.get(ticket.assignedAgentId)
           : null;
         
+        // Get message count for conversation indicator
+        const messages = await ctx.db
+          .query("messages")
+          .withIndex("by_ticket", (q) => q.eq("ticketId", ticket._id))
+          .collect();
+        
+        const messageCount = messages.length;
+        const hasConversation = messageCount > 0;
+        
+        // Get unread message count if currentUserId is provided
+        let unreadCount = 0;
+        if (args.currentUserId) {
+          const ticketView = await ctx.db
+            .query("ticketViews")
+            .withIndex("by_ticket_user", (q) => 
+              q.eq("ticketId", ticket._id).eq("userId", args.currentUserId!)
+            )
+            .first();
+          
+          const lastViewedAt = ticketView?.lastViewedAt || 0;
+          const unreadMessages = messages.filter(msg => msg.createdAt > lastViewedAt);
+          unreadCount = unreadMessages.length;
+        }
+        
         return {
           ...ticket,
           customer,
           assignedAgent,
+          messageCount,
+          hasConversation,
+          unreadCount,
         };
       })
     );
@@ -89,7 +132,10 @@ export const getAllTickets = query({
 
 // Get tickets for a specific customer
 export const getCustomerTickets = query({
-  args: { customerId: v.id("authUsers") },
+  args: { 
+    customerId: v.id("authUsers"),
+    currentUserId: v.optional(v.id("authUsers")),
+  },
   handler: async (ctx, args) => {
     const tickets = await ctx.db
       .query("tickets")
@@ -97,7 +143,42 @@ export const getCustomerTickets = query({
       .order("desc")
       .collect();
     
-    return tickets;
+    // Enrich with message count for conversation indicator
+    const enrichedTickets = await Promise.all(
+      tickets.map(async (ticket) => {
+        const messages = await ctx.db
+          .query("messages")
+          .withIndex("by_ticket", (q) => q.eq("ticketId", ticket._id))
+          .collect();
+        
+        const messageCount = messages.length;
+        const hasConversation = messageCount > 0;
+        
+        // Get unread message count if currentUserId is provided
+        let unreadCount = 0;
+        if (args.currentUserId) {
+          const ticketView = await ctx.db
+            .query("ticketViews")
+            .withIndex("by_ticket_user", (q) => 
+              q.eq("ticketId", ticket._id).eq("userId", args.currentUserId!)
+            )
+            .first();
+          
+          const lastViewedAt = ticketView?.lastViewedAt || 0;
+          const unreadMessages = messages.filter(msg => msg.createdAt > lastViewedAt);
+          unreadCount = unreadMessages.length;
+        }
+        
+        return {
+          ...ticket,
+          messageCount,
+          hasConversation,
+          unreadCount,
+        };
+      })
+    );
+    
+    return enrichedTickets;
   },
 });
 
@@ -112,11 +193,17 @@ export const updateTicketStatus = mutation({
     const ticket = await ctx.db.get(args.ticketId);
     if (!ticket) throw new Error("Ticket not found");
     
-    await ctx.db.patch(args.ticketId, {
+    const updateData: any = {
       status: args.status,
-      assignedAgentId: args.assignedAgentId,
       updatedAt: Date.now(),
-    });
+    };
+    
+    // Only update assignedAgentId if it's provided
+    if (args.assignedAgentId !== undefined) {
+      updateData.assignedAgentId = args.assignedAgentId;
+    }
+    
+    await ctx.db.patch(args.ticketId, updateData);
     
     // Get customer and agent info for email
     const customer = await ctx.db.get(ticket.customerId);
@@ -277,5 +364,64 @@ export const updateAISummary = mutation({
       aiSummary: args.summary,
       updatedAt: Date.now(),
     });
+  },
+});
+
+// Mark a ticket as viewed by a user (for unread indicators)
+export const markTicketAsViewed = mutation({
+  args: {
+    ticketId: v.id("tickets"),
+    userId: v.id("authUsers"),
+  },
+  handler: async (ctx, args) => {
+    // Find existing view record
+    const existingView = await ctx.db
+      .query("ticketViews")
+      .withIndex("by_ticket_user", (q) => 
+        q.eq("ticketId", args.ticketId).eq("userId", args.userId)
+      )
+      .first();
+    
+    if (existingView) {
+      // Update existing view
+      await ctx.db.patch(existingView._id, {
+        lastViewedAt: Date.now(),
+      });
+    } else {
+      // Create new view record
+      await ctx.db.insert("ticketViews", {
+        ticketId: args.ticketId,
+        userId: args.userId,
+        lastViewedAt: Date.now(),
+      });
+    }
+  },
+});
+
+// Get unread message count for a user on a ticket
+export const getUnreadMessageCount = query({
+  args: {
+    ticketId: v.id("tickets"),
+    userId: v.id("authUsers"),
+  },
+  handler: async (ctx, args) => {
+    // Get the last viewed time for this user on this ticket
+    const ticketView = await ctx.db
+      .query("ticketViews")
+      .withIndex("by_ticket_user", (q) => 
+        q.eq("ticketId", args.ticketId).eq("userId", args.userId)
+      )
+      .first();
+    
+    const lastViewedAt = ticketView?.lastViewedAt || 0;
+    
+    // Count messages created after the last viewed time
+    const messages = await ctx.db
+      .query("messages")
+      .withIndex("by_ticket", (q) => q.eq("ticketId", args.ticketId))
+      .filter((q) => q.gt(q.field("createdAt"), lastViewedAt))
+      .collect();
+    
+    return messages.length;
   },
 });

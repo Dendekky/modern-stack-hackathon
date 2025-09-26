@@ -131,4 +131,13 @@ export default defineSchema({
     createdAt: v.number(),
     updatedAt: v.number(),
   }),
+
+  // Track when users last viewed tickets for unread message indicators
+  ticketViews: defineTable({
+    ticketId: v.id("tickets"),
+    userId: v.id("authUsers"),
+    lastViewedAt: v.number(),
+  })
+    .index("by_ticket_user", ["ticketId", "userId"])
+    .index("by_user", ["userId"]),
 });

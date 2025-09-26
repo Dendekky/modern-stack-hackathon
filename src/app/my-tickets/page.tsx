@@ -20,7 +20,7 @@ export default function MyTicketsPage() {
   
   const tickets = useQuery(
     api.tickets.getCustomerTickets,
-    me ? { customerId: me._id } : ("skip" as any)
+    me ? { customerId: me._id, currentUserId: me._id } : ("skip" as any)
   );
 
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -61,131 +61,137 @@ export default function MyTicketsPage() {
   }) || [];
 
   return (
-    <PageLayout>
-      <PageHeader 
-        title="My Support Tickets"
-        description="Track and manage your support requests"
-      >
-        <Link href="/create-ticket">
-          <Button variant="outline">
-            Create New Ticket
-          </Button>
-        </Link>
-      </PageHeader>
-
-      {/* Filters */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>Filters</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex gap-4 flex-wrap">
-            <div>
-              <label className="block text-sm font-medium mb-2">Status</label>
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="all">All Status</option>
-                <option value="open">Open</option>
-                <option value="in_progress">In Progress</option>
-                <option value="resolved">Resolved</option>
-                <option value="closed">Closed</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">Priority</label>
-              <select
-                value={priorityFilter}
-                onChange={(e) => setPriorityFilter(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="all">All Priority</option>
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
-                <option value="urgent">Urgent</option>
-              </select>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Tickets List */}
-      {filteredTickets.length === 0 ? (
-        <Card>
-          <CardContent className="text-center py-12">
-            <div className="text-gray-400 mb-4">
-              <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-            </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No tickets found</h3>
-            <p className="text-gray-600 mb-4">
-              {tickets?.length === 0 
-                ? "You haven't created any support tickets yet." 
-                : "No tickets match your current filters."}
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
+      <PageLayout maxWidth="2xl">
+        <div className="py-12">
+          {/* Header */}
+          <div className="text-center mb-12">
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              My Support Tickets
+            </h1>
+            <p className="text-lg text-gray-600 mb-8">
+              Track and manage your support requests
             </p>
             <Link href="/create-ticket">
-              <Button>Create Your First Ticket</Button>
+              <Button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5">
+                Create New Ticket
+              </Button>
             </Link>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="space-y-4">
-          {filteredTickets.map((ticket) => (
-            <TicketCard 
-              key={ticket._id}
-              ticket={ticket}
-              actions={
-                <Link href={`/ticket/${ticket._id}`}>
-                  <Button variant="outline" size="sm">
-                    View Details
+          </div>
+
+          {/* Quick Stats */}
+          {tickets && tickets.length > 0 && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+              {[
+                { label: "Total", count: tickets.length, color: "bg-blue-50 text-blue-700", icon: "📊" },
+                { label: "Active", count: tickets.filter(t => t.status === "open" || t.status === "in_progress").length, color: "bg-orange-50 text-orange-700", icon: "⚡" },
+                { label: "Resolved", count: tickets.filter(t => t.status === "resolved").length, color: "bg-green-50 text-green-700", icon: "✅" },
+                { label: "Closed", count: tickets.filter(t => t.status === "closed").length, color: "bg-gray-50 text-gray-700", icon: "📁" }
+              ].map((stat) => (
+                <Card key={stat.label} className="border-gray-200/60 bg-white/70 backdrop-blur-sm">
+                  <CardContent className="p-6 text-center">
+                    <div className="text-2xl mb-2">{stat.icon}</div>
+                    <div className="text-2xl font-bold text-gray-900 mb-1">{stat.count}</div>
+                    <p className="text-sm font-medium text-gray-600">{stat.label}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+
+          {/* Filters */}
+          <Card className="mb-8 border-gray-200/60 bg-white/70 backdrop-blur-sm">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-6 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-gray-700">Filter by:</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <label className="text-sm font-medium text-gray-600">Status</label>
+                  <select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    className="px-3 py-2 bg-white border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  >
+                    <option value="all">All</option>
+                    <option value="open">Open</option>
+                    <option value="in_progress">In Progress</option>
+                    <option value="resolved">Resolved</option>
+                    <option value="closed">Closed</option>
+                  </select>
+                </div>
+                <div className="flex items-center gap-2">
+                  <label className="text-sm font-medium text-gray-600">Priority</label>
+                  <select
+                    value={priorityFilter}
+                    onChange={(e) => setPriorityFilter(e.target.value)}
+                    className="px-3 py-2 bg-white border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  >
+                    <option value="all">All</option>
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                    <option value="urgent">Urgent</option>
+                  </select>
+                </div>
+                {(statusFilter !== "all" || priorityFilter !== "all") && (
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => {
+                      setStatusFilter("all");
+                      setPriorityFilter("all");
+                    }}
+                    className="text-xs"
+                  >
+                    Clear Filters
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Tickets List */}
+          {filteredTickets.length === 0 ? (
+            <Card className="border-gray-200/60 bg-white/70 backdrop-blur-sm">
+              <CardContent className="text-center py-16">
+                <div className="w-20 h-20 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                  <span className="text-3xl">📝</span>
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  {tickets?.length === 0 ? "No tickets yet" : "No matching tickets"}
+                </h3>
+                <p className="text-gray-600 mb-8 max-w-md mx-auto">
+                  {tickets?.length === 0 
+                    ? "You haven't created any support tickets yet. Create your first ticket to get started." 
+                    : "No tickets match your current filters. Try adjusting your filter criteria."}
+                </p>
+                <Link href="/create-ticket">
+                  <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+                    Create Your First Ticket
                   </Button>
                 </Link>
-              }
-            />
-          ))}
-        </div>
-      )}
-
-      {/* Summary Stats */}
-      {tickets && tickets.length > 0 && (
-        <Card className="mt-8">
-          <CardHeader>
-            <CardTitle>Summary</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">
-                  {tickets.length}
-                </div>
-                <div className="text-sm text-gray-600">Total Tickets</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-yellow-600">
-                  {tickets.filter(t => t.status === "open" || t.status === "in_progress").length}
-                </div>
-                <div className="text-sm text-gray-600">Active</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">
-                  {tickets.filter(t => t.status === "resolved").length}
-                </div>
-                <div className="text-sm text-gray-600">Resolved</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-gray-600">
-                  {tickets.filter(t => t.status === "closed").length}
-                </div>
-                <div className="text-sm text-gray-600">Closed</div>
-              </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-4">
+              {filteredTickets.map((ticket) => (
+                <TicketCard 
+                  key={ticket._id}
+                  ticket={ticket}
+                  actions={
+                    <Link href={`/ticket/${ticket._id}`}>
+                      <Button variant="outline" size="sm" className="bg-white hover:bg-gray-50">
+                        View Details
+                      </Button>
+                    </Link>
+                  }
+                />
+              ))}
             </div>
-          </CardContent>
-        </Card>
-      )}
-    </PageLayout>
+          )}
+        </div>
+      </PageLayout>
+    </div>
   );
 }

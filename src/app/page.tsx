@@ -4,7 +4,6 @@ import { TicketDashboard } from "@/components/TicketDashboard";
 import { DemoSetup } from "@/components/DemoSetup";
 import { KnowledgeBase } from "@/components/KnowledgeBase";
 import { PageLayout } from "@/components/ui/page-layout";
-import { PageHeader } from "@/components/ui/page-header";
 import { authClient } from "@/lib/auth-client";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
@@ -29,60 +28,70 @@ export default function Home() {
   }, [me, router]);
 
   return (
-    <PageLayout>
-      <div className="text-center mb-12">
-        <h1 className="text-5xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
-          Support Ticketing System
-        </h1>
-        <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-          AI-powered customer support with real-time updates and voice capabilities
-        </p>
-      </div>
-      
-      <div className="mb-8">
-        <DemoSetup />
-      </div>
-      
-      {isAgent ? (
-        <div className="space-y-6">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-              <span className="text-purple-600 font-semibold">1</span>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
+      <PageLayout maxWidth="2xl">
+        {/* Hero Section */}
+        <div className="text-center py-16 mb-8">
+          <div className="inline-flex items-center px-4 py-2 bg-blue-50 border border-blue-200 rounded-full text-blue-700 text-sm font-medium mb-6">
+            <span className="w-2 h-2 bg-blue-500 rounded-full mr-2 animate-pulse"></span>
+            AI-Powered Support System
+          </div>
+          <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+            Support Ticketing
+            <span className="block bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              Made Simple
+            </span>
+          </h1>
+          <p className="text-lg md:text-xl text-gray-600 mb-12 max-w-2xl mx-auto leading-relaxed">
+            Experience next-generation customer support with real-time updates, AI assistance, and voice capabilities.
+          </p>
+        </div>
+
+        {/* Demo Setup */}
+        <div className="mb-16">
+          <DemoSetup />
+        </div>
+
+        {/* Main Content */}
+        <div className="space-y-16">
+          {isAgent ? (
+            <div>
+              <div className="text-center mb-8">
+                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">Agent Dashboard</h2>
+                <p className="text-gray-600 text-lg">Manage and respond to customer support tickets</p>
+              </div>
+              <TicketDashboard />
             </div>
-            <h2 className="text-2xl font-semibold text-gray-800">Agent Dashboard</h2>
-          </div>
-          <TicketDashboard />
-        </div>
-      ) : (
-        <div className="space-y-6">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-              <span className="text-blue-600 font-semibold">1</span>
+          ) : (
+            <div>
+              <div className="text-center mb-8">
+                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">Create Support Ticket</h2>
+                <p className="text-gray-600 text-lg">Get help from our support team</p>
+              </div>
+              <TicketForm />
             </div>
-            <h2 className="text-2xl font-semibold text-gray-800">Customer Portal</h2>
+          )}
+
+          {/* Knowledge Base Section */}
+          <div>
+            <div className="text-center mb-8">
+              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">Knowledge Base</h2>
+              <p className="text-gray-600 text-lg">Find answers to common questions</p>
+            </div>
+            <KnowledgeBase />
           </div>
-          <TicketForm />
         </div>
-      )}
-      
-      <div className="mt-12">
-        <div className="flex items-center space-x-3 mb-6">
-          <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-            <span className="text-green-600 font-semibold">3</span>
+
+        {/* Status Footer */}
+        <div className="text-center py-16 mt-24">
+          <div className="inline-flex items-center px-6 py-3 bg-white border border-green-200 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+            <div className="w-3 h-3 bg-green-500 rounded-full mr-3 animate-pulse"></div>
+            <span className="text-gray-700 font-medium">
+              System Status: All services operational
+            </span>
           </div>
-          <h2 className="text-2xl font-semibold text-gray-800">Knowledge Base</h2>
         </div>
-        <KnowledgeBase />
-      </div>
-      
-      <div className="mt-12 text-center">
-        <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-full shadow-lg">
-          <span className="mr-2">✅</span>
-          <span className="font-medium">
-            Project Status: AI-powered ticketing with Firecrawl knowledge base integration ready!
-          </span>
-        </div>
-      </div>
-    </PageLayout>
+      </PageLayout>
+    </div>
   )
 }

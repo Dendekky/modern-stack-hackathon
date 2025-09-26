@@ -10,7 +10,7 @@ import { PageLayout } from "@/components/ui/page-layout";
 import { AISuggestions } from "@/components/AISuggestions";
 import { formatDate, formatStatus } from "@/lib/ui-utils";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Id } from "../../../../convex/_generated/dataModel";
 
 interface TicketDetailPageProps {
@@ -33,12 +33,23 @@ export default function TicketDetailPage({ params }: TicketDetailPageProps) {
   const ticket = useQuery(api.tickets.getTicketById, { ticketId });
   const messages = useQuery(api.tickets.getMessagesForTicket, { ticketId });
   const addMessage = useMutation(api.tickets.addMessage);
+  const markAsViewed = useMutation(api.tickets.markTicketAsViewed);
 
   // Check if current user owns this ticket or is an agent
   const canViewTicket = me && ticket && (
     (me.role === "customer" && ticket.customerId === me._id) ||
     me.role === "agent"
   );
+
+  // Mark ticket as viewed when user visits the page
+  useEffect(() => {
+    if (me && ticket && canViewTicket) {
+      markAsViewed({
+        ticketId: ticket._id,
+        userId: me._id,
+      }).catch(console.error);
+    }
+  }, [me?._id, ticket?._id, canViewTicket, markAsViewed]);
 
   const handleSubmitMessage = async (e: React.FormEvent) => {
     e.preventDefault();

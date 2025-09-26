@@ -18,8 +18,8 @@ export function PageLayout({ children, className, maxWidth = "xl" }: PageLayoutP
   };
 
   return (
-    <div className={layoutClasses.page}>
-      <div className={layoutClasses.container}>
+    <div className="min-h-screen text-render">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className={cn(maxWidthClasses[maxWidth], className)}>
           {children}
         </div>
