@@ -85,7 +85,7 @@ export function DemoSetup() {
         </div>
         <p className="text-xs text-yellow-700 mt-3">
           Use Firecrawl integration to scrape documentation and build your knowledge base dynamically.<br />
-          <strong>Fix User Roles</strong> if you see "unset" roles in the database.
+          <strong>Fix User Roles</strong> if you see &quot;unset&quot; roles in the database.
         </p>
       </CardContent>
     </Card>

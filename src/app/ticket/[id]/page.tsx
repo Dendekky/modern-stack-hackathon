@@ -44,7 +44,7 @@ export default function TicketDetailPage({ params }: TicketDetailPageProps) {
 
   // Mark ticket as viewed when user visits the page
   useEffect(() => {
-    if (me && ticket && canViewTicket) {
+    if (me?._id && ticket?._id && canViewTicket) {
       markAsViewed({
         ticketId: ticket._id,
         userId: me._id,
@@ -102,7 +102,7 @@ export default function TicketDetailPage({ params }: TicketDetailPageProps) {
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Access Denied</h1>
           <p className="text-gray-600 mb-4">
-            You don't have permission to view this ticket.
+            You don&apos;t have permission to view this ticket.
           </p>
           <Link href={me?.role === "customer" ? "/my-tickets" : "/"}>
             <Button>Go Back</Button>
