@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useQuery, useMutation } from "convex/react";
+import { useQuery, useMutation, useAction } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,8 +21,8 @@ export function KnowledgeBase() {
     searchTerm ? { searchTerm } : "skip"
   );
   
-  const scrapeWebsite = useMutation(api.firecrawl.scrapeWebsite);
-  const scrapePage = useMutation(api.firecrawl.scrapePage);
+  const scrapeWebsite = useAction(api.firecrawl.scrapeWebsite);
+  const scrapePage = useAction(api.firecrawl.scrapePage);
   const deleteDocument = useMutation(api.knowledgeBase.deleteDocument);
 
   const displayedDocuments = searchTerm ? (searchResults || []) : (documents || []);
