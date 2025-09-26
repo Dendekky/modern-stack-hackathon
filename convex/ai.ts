@@ -71,10 +71,11 @@ Format your response with:
 Keep it concise but comprehensive. Only provide solutions you're confident about based on the documentation.`;
 
       const agentSystemPrompt = `You are an AI assistant for a customer support team. Classify tickets and draft helpful replies for agents.
-Return JSON with keys: category, priority, suggestedReply.
+Return ONLY a valid JSON object with these exact keys: category, priority, suggestedReply.
 - category: one of [billing, authentication, technical, feature_request, urgent, general]  
 - priority: one of [low, medium, high, urgent]
-Base decisions on the ticket and provided docs.`;
+- suggestedReply: a helpful reply for the agent to use
+Base decisions on the ticket and provided docs. Do not include markdown formatting or code blocks in your response.`;
 
       const userPrompt = `Ticket Title: ${args.title}\nTicket Description: ${args.description}\n\nRelevant Documentation:\n${docsContext}`;
 
@@ -94,18 +95,40 @@ Base decisions on the ticket and provided docs.`;
           model: "gpt-4o-mini",
           messages: [
             { role: "system", content: agentSystemPrompt },
-            { role: "user", content: userPrompt + "\n\nRespond ONLY with JSON." }
+            { role: "user", content: userPrompt + "\n\nRespond with ONLY a valid JSON object. No markdown, no code blocks, no additional text." }
           ],
           temperature: 0.2,
         });
 
         const customerResponseText = customerResponse.choices[0]?.message?.content || "";
         const agentContent = agentResponse.choices[0]?.message?.content || "{}";
-        const agentParsed = JSON.parse(agentContent) as {
+        
+        // Clean up the JSON response - remove markdown code blocks if present
+        const cleanedAgentContent = agentContent
+          .replace(/```json\s*/g, '')
+          .replace(/```\s*/g, '')
+          .trim();
+        
+        let agentParsed: {
           category?: string;
           priority?: string;
           suggestedReply?: string;
         };
+        
+        try {
+          agentParsed = JSON.parse(cleanedAgentContent);
+        } catch (parseError) {
+          console.error("Failed to parse agent JSON response:", parseError);
+          console.error("Original content:", agentContent);
+          console.error("Cleaned content:", cleanedAgentContent);
+          
+          // Fallback to default values if JSON parsing fails
+          agentParsed = {
+            category: "general",
+            priority: "medium",
+            suggestedReply: "AI analysis completed - please review manually.",
+          };
+        }
 
         analysis = {
           category: agentParsed.category || "general",
