@@ -5,7 +5,6 @@ import { api } from "../../convex/_generated/api";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { TicketCard } from "@/components/ui/ticket-card";
 import { Button } from "@/components/ui/button";
-import { AISuggestions } from "./AISuggestions";
 import { authClient } from "@/lib/auth-client";
 import Link from "next/link";
 
@@ -105,14 +104,6 @@ export function TicketDashboard() {
                   showStatusDropdown={true}
                   actions={null}
                 />
-                
-                {/* AI Suggestions */}
-                <div className="ml-6">
-                  <AISuggestions 
-                    suggestions={ticket.aiSuggestions}
-                    isLoading={!ticket.aiSuggestions}
-                  />
-                </div>
               </div>
             ))}
           </div>
