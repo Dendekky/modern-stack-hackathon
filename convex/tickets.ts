@@ -242,6 +242,43 @@ export const addAISuggestions = mutation({
   },
 });
 
+// Add AI quick response for customers
+export const addAIQuickResponse = mutation({
+  args: {
+    ticketId: v.id("tickets"),
+    quickResponse: v.object({
+      hasKnowledgeBaseMatch: v.boolean(),
+      response: v.optional(v.string()),
+      relevantDocs: v.optional(v.array(v.object({
+        title: v.string(),
+        url: v.string(),
+        snippet: v.string(),
+      }))),
+      escalatedToHighPriority: v.optional(v.boolean()),
+    }),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.ticketId, {
+      aiQuickResponse: args.quickResponse,
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+// Update ticket priority
+export const updateTicketPriority = mutation({
+  args: {
+    ticketId: v.id("tickets"),
+    priority: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.ticketId, {
+      priority: args.priority,
+      updatedAt: Date.now(),
+    });
+  },
+});
+
 // Get a single ticket by id (for AI summary and other actions)
 export const getTicketById = query({
   args: { ticketId: v.id("tickets") },

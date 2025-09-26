@@ -180,11 +180,68 @@ export default function TicketDetailPage({ params }: TicketDetailPageProps) {
               </div>
             )}
 
-            {ticket.aiSummary && (
+            {ticket.aiQuickResponse && ticket.aiQuickResponse.hasKnowledgeBaseMatch && ticket.aiQuickResponse.response && (
               <div>
-                <h4 className="font-semibold text-lg mb-3">AI Summary</h4>
-                <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
-                  <p className="text-gray-700 leading-relaxed">{ticket.aiSummary}</p>
+                <h4 className="font-semibold text-lg mb-3 flex items-center">
+                  <span className="mr-2">🤖</span>
+                  Quick Response (powered by AI)
+                </h4>
+                <div className="bg-green-50 border border-green-200 p-4 rounded-lg">
+                  <div className="text-gray-700 leading-relaxed whitespace-pre-wrap mb-4">
+                    {ticket.aiQuickResponse.response}
+                  </div>
+                  
+                  {ticket.aiQuickResponse.relevantDocs && ticket.aiQuickResponse.relevantDocs.length > 0 && (
+                    <div className="border-t border-green-200 pt-4">
+                      <h5 className="font-medium text-green-800 mb-2">📚 Referenced Documentation:</h5>
+                      <div className="space-y-2">
+                        {ticket.aiQuickResponse.relevantDocs.map((doc, index) => (
+                          <div key={index} className="bg-white p-3 rounded border border-green-100">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <h6 className="font-medium text-gray-900 text-sm">{doc.title}</h6>
+                                <p className="text-xs text-gray-600 mt-1">{doc.snippet}</p>
+                              </div>
+                              {doc.url && (
+                                <a
+                                  href={doc.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="ml-2 text-blue-600 hover:text-blue-800 text-xs flex items-center"
+                                >
+                                  View Source
+                                  <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                  </svg>
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {ticket.aiQuickResponse && !ticket.aiQuickResponse.hasKnowledgeBaseMatch && ticket.aiQuickResponse.escalatedToHighPriority && (
+              <div>
+                <h4 className="font-semibold text-lg mb-3 flex items-center">
+                  <span className="mr-2">⚡</span>
+                  Priority Support Required
+                </h4>
+                <div className="bg-orange-50 border border-orange-200 p-4 rounded-lg">
+                  <p className="text-gray-700 leading-relaxed">
+                    Your ticket has been automatically escalated to <strong>high priority</strong> as it requires specialized attention from our support team. 
+                    Our agents will review your request and provide a personalized response soon.
+                  </p>
+                  <div className="mt-3 flex items-center text-sm text-orange-700">
+                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Expected response time: Within 4 hours
+                  </div>
                 </div>
               </div>
             )}

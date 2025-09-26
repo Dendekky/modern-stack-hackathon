@@ -104,7 +104,17 @@ export default defineSchema({
       suggestedReply: v.optional(v.string()),
       relevantDocs: v.optional(v.array(v.string())),
     })),
-    aiSummary: v.optional(v.string()),
+    aiSummary: v.optional(v.string()), // Keep for backward compatibility
+    aiQuickResponse: v.optional(v.object({
+      hasKnowledgeBaseMatch: v.boolean(),
+      response: v.optional(v.string()),
+      relevantDocs: v.optional(v.array(v.object({
+        title: v.string(),
+        url: v.string(),
+        snippet: v.string(),
+      }))),
+      escalatedToHighPriority: v.optional(v.boolean()),
+    })),
     isVoiceTicket: v.optional(v.boolean()),
     voiceTranscript: v.optional(v.string()),
   })
