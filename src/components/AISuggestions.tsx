@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
+import ReactMarkdown from "react-markdown";
 
 interface AISuggestionsProps {
   suggestions?: {
@@ -105,12 +106,14 @@ export function AISuggestions({ suggestions, isLoading, ticketId, agentId, showS
           <div>
             <h4 className="font-medium text-blue-900 mb-2">Suggested Reply</h4>
             <div className="bg-white p-3 rounded-md border">
-              <p className="text-sm text-gray-700">
-                {showFullReply 
-                  ? suggestions.suggestedReply 
-                  : `${suggestions.suggestedReply.substring(0, 100)}${suggestions.suggestedReply.length > 100 ? '...' : ''}`
-                }
-              </p>
+              <div className="text-sm text-gray-700 prose prose-sm max-w-none prose-headings:text-gray-800 prose-p:text-gray-700 prose-strong:text-gray-800 prose-ul:text-gray-700 prose-ol:text-gray-700 prose-code:bg-gray-100 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-gray-800">
+                <ReactMarkdown>
+                  {showFullReply 
+                    ? suggestions.suggestedReply 
+                    : `${suggestions.suggestedReply.substring(0, 100)}${suggestions.suggestedReply.length > 100 ? '...' : ''}`
+                  }
+                </ReactMarkdown>
+              </div>
               {suggestions.suggestedReply.length > 100 && (
                 <Button
                   variant="link"

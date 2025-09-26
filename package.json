@@ -10,6 +10,7 @@
     "lint": "next lint"
   },
   "devDependencies": {
+    "@tailwindcss/typography": "^0.5.19",
     "@types/bun": "latest",
     "tailwindcss": "3.4.0"
   },
@@ -35,6 +36,7 @@
     "postcss": "^8.5.6",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
+    "react-markdown": "^10.1.0",
     "resend": "^6.1.0",
     "tailwind-merge": "^3.3.1"
   }
