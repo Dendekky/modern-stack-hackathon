@@ -15,24 +15,31 @@ import { Id } from "../../../../convex/_generated/dataModel";
 import ReactMarkdown from "react-markdown";
 
 interface TicketDetailPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default function TicketDetailPage({ params }: TicketDetailPageProps) {
-  const ticketId = params.id as Id<"tickets">;
+  const [ticketId, setTicketId] = useState<Id<"tickets"> | null>(null);
   const { data: session } = authClient.useSession();
   const [newMessage, setNewMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Resolve the async params
+  useEffect(() => {
+    params.then(({ id }) => {
+      setTicketId(id as Id<"tickets">);
+    });
+  }, [params]);
   
   const me = useQuery(
     api.users.getUserByEmail,
     session?.user?.email ? { email: session.user.email } : ("skip" as any)
   );
   
-  const ticket = useQuery(api.tickets.getTicketById, { ticketId });
-  const messages = useQuery(api.tickets.getMessagesForTicket, { ticketId });
+  const ticket = useQuery(api.tickets.getTicketById, ticketId ? { ticketId } : "skip");
+  const messages = useQuery(api.tickets.getMessagesForTicket, ticketId ? { ticketId } : "skip");
   const addMessage = useMutation(api.tickets.addMessage);
   const markAsViewed = useMutation(api.tickets.markTicketAsViewed);
 
@@ -54,7 +61,7 @@ export default function TicketDetailPage({ params }: TicketDetailPageProps) {
 
   const handleSubmitMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim() || !me || isSubmitting) return;
+    if (!newMessage.trim() || !me || isSubmitting || !ticketId) return;
     
     setIsSubmitting(true);
     try {
@@ -82,6 +89,17 @@ export default function TicketDetailPage({ params }: TicketDetailPageProps) {
       messageInput.focus();
     }
   };
+
+  // Show loading while resolving params
+  if (!ticketId) {
+    return (
+      <PageLayout>
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">Loading...</h1>
+        </div>
+      </PageLayout>
+    );
+  }
 
   if (!session) {
     return (

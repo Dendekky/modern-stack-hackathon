@@ -48,19 +48,23 @@ export function TicketCard({
     }
   };
 
-  const statusColor = {
+  const statusColors = {
     open: "bg-blue-50 text-blue-700 border-blue-200",
     in_progress: "bg-yellow-50 text-yellow-700 border-yellow-200",
     resolved: "bg-green-50 text-green-700 border-green-200",
     closed: "bg-gray-50 text-gray-700 border-gray-200"
-  }[ticket.status] || "bg-gray-50 text-gray-700 border-gray-200";
+  } as const;
+  
+  const statusColor = statusColors[ticket.status as keyof typeof statusColors] || "bg-gray-50 text-gray-700 border-gray-200";
 
-  const priorityColor = {
+  const priorityColors = {
     low: "bg-gray-50 text-gray-600",
     medium: "bg-blue-50 text-blue-600",
     high: "bg-orange-50 text-orange-600",
     urgent: "bg-red-50 text-red-600"
-  }[ticket.priority] || "bg-gray-50 text-gray-600";
+  } as const;
+  
+  const priorityColor = priorityColors[ticket.priority as keyof typeof priorityColors] || "bg-gray-50 text-gray-600";
 
   return (
     <Card className={cn(

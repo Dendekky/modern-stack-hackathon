@@ -141,7 +141,7 @@ export const fixUnsetRoles = mutation({
     for (const user of usersWithUnsetRoles) {
       await ctx.db.patch(user._id, {
         role: "customer", // Default to customer
-        plan: user.plan === "unset" || user.plan == null ? "free" : user.plan,
+        plan: user.plan == null ? "free" : user.plan,
         updatedAt: Date.now(),
       });
       updates.push(user._id);

@@ -57,7 +57,10 @@ export const sendTicketCreatedEmail = action({
     } catch (error) {
       console.error('Failed to send ticket created email:', error);
       // Don't throw - we don't want ticket creation to fail because of email issues
-      return { success: false, error: error.message };
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : String(error) 
+      };
     }
   },
 });
@@ -127,7 +130,10 @@ export const sendTicketStatusEmail = action({
     } catch (error) {
       console.error('Failed to send ticket status email:', error);
       // Don't throw - we don't want status updates to fail because of email issues
-      return { success: false, error: error.message };
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : String(error) 
+      };
     }
   },
 });
@@ -206,7 +212,10 @@ export const sendWelcomeEmail = action({
     } catch (error) {
       console.error('Failed to send welcome email:', error);
       // Don't throw - we don't want signup to fail because of email issues
-      return { success: false, error: error.message };
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : String(error) 
+      };
     }
   },
 });
@@ -264,7 +273,10 @@ export const sendSignInNotificationEmail = action({
     } catch (error) {
       console.error('Failed to send signin notification email:', error);
       // Don't throw - we don't want signin to fail because of email issues
-      return { success: false, error: error.message };
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : String(error) 
+      };
     }
   },
 });

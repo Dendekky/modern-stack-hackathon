@@ -269,7 +269,12 @@ export const addAIQuickResponse = mutation({
 export const updateTicketPriority = mutation({
   args: {
     ticketId: v.id("tickets"),
-    priority: v.string(),
+    priority: v.union(
+      v.literal("low"),
+      v.literal("medium"),
+      v.literal("high"),
+      v.literal("urgent")
+    ),
   },
   handler: async (ctx, args) => {
     await ctx.db.patch(args.ticketId, {
