@@ -6,8 +6,10 @@ import { api } from "../../convex/_generated/api";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Trash2, ExternalLink, Search, Globe, FileText, Tag } from "lucide-react";
+import type { KnowledgeBase as KnowledgeBaseDoc } from "@/types";
 
 interface KnowledgeBaseProps {
+  documents: KnowledgeBaseDoc[] | undefined;
   searchTerm: string;
   setSearchTerm: (term: string) => void;
   websiteUrl: string;
@@ -23,6 +25,7 @@ interface KnowledgeBaseProps {
 }
 
 export function KnowledgeBase({
+  documents,
   searchTerm,
   setSearchTerm,
   websiteUrl,
@@ -36,8 +39,6 @@ export function KnowledgeBase({
   isScrapingPage,
   setIsScrapingPage,
 }: KnowledgeBaseProps) {
-
-  const documents = useQuery(api.knowledgeBase.getAllDocuments);
   const searchResults = useQuery(
     api.knowledgeBase.searchDocuments,
     searchTerm ? { searchTerm } : "skip"

@@ -28,6 +28,7 @@ export default function DashboardPage() {
     api.tickets.getAllTickets,
     me?._id ? { currentUserId: me._id } : ("skip" as any)
   );
+  const knowledgeDocuments = useQuery(api.knowledgeBase.getAllDocuments);
 
   const [activeTab, setActiveTab] = useState<"tickets" | "knowledge">("tickets");
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -262,6 +263,7 @@ export default function DashboardPage() {
           ) : (
             <div>
               <KnowledgeBase 
+                documents={knowledgeDocuments}
                 searchTerm={knowledgeSearchTerm}
                 setSearchTerm={setKnowledgeSearchTerm}
                 websiteUrl={websiteUrl}
