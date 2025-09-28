@@ -11,7 +11,12 @@ import { TicketCard } from "@/components/ui/ticket-card";
 import { CreateTicketModal } from "@/components/CreateTicketModal";
 import { DialogTrigger } from "@/components/ui/dialog";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import type { Ticket } from "@/types";
 
 export default function MyTicketsPage() {
   const { data: session } = authClient.useSession();
@@ -27,6 +32,7 @@ export default function MyTicketsPage() {
 
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [priorityFilter, setPriorityFilter] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   if (!session) {
@@ -56,12 +62,26 @@ export default function MyTicketsPage() {
     );
   }
 
-  // Filter tickets based on selected filters
-  const filteredTickets = tickets?.filter(ticket => {
-    const statusMatch = statusFilter === "all" || ticket.status === statusFilter;
-    const priorityMatch = priorityFilter === "all" || ticket.priority === priorityFilter;
-    return statusMatch && priorityMatch;
-  }) || [];
+  // Filter tickets based on selected filters and search
+  const filteredTickets = useMemo(() => {
+    if (!tickets) return [];
+    
+    return tickets.filter((ticket: Ticket) => {
+      const statusMatch = statusFilter === "all" || ticket.status === statusFilter;
+      const priorityMatch = priorityFilter === "all" || ticket.priority === priorityFilter;
+      
+      let searchMatch = true;
+      if (searchQuery.trim()) {
+        const searchTerm = searchQuery.toLowerCase().trim();
+        searchMatch = 
+          ticket.title.toLowerCase().includes(searchTerm) ||
+          ticket.description.toLowerCase().includes(searchTerm) ||
+          (ticket.category?.toLowerCase().includes(searchTerm) ?? false);
+      }
+      
+      return statusMatch && priorityMatch && searchMatch;
+    });
+  }, [tickets, statusFilter, priorityFilter, searchQuery]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
@@ -82,9 +102,9 @@ export default function MyTicketsPage() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
               {[
                 { label: "Total", count: tickets.length, color: "bg-blue-50 text-blue-700", icon: "📊" },
-                { label: "Active", count: tickets.filter(t => t.status === "open" || t.status === "in_progress").length, color: "bg-orange-50 text-orange-700", icon: "⚡" },
-                { label: "Resolved", count: tickets.filter(t => t.status === "resolved").length, color: "bg-green-50 text-green-700", icon: "✅" },
-                { label: "Closed", count: tickets.filter(t => t.status === "closed").length, color: "bg-gray-50 text-gray-700", icon: "📁" }
+                { label: "Active", count: tickets.filter((t: Ticket) => t.status === "open" || t.status === "in_progress").length, color: "bg-orange-50 text-orange-700", icon: "⚡" },
+                { label: "Resolved", count: tickets.filter((t: Ticket) => t.status === "resolved").length, color: "bg-green-50 text-green-700", icon: "✅" },
+                { label: "Closed", count: tickets.filter((t: Ticket) => t.status === "closed").length, color: "bg-gray-50 text-gray-700", icon: "📁" }
               ].map((stat) => (
                 <Card key={stat.label} className="border-gray-200/60 bg-white/70 backdrop-blur-sm">
                   <CardContent className="p-4 text-center">
@@ -97,53 +117,69 @@ export default function MyTicketsPage() {
             </div>
           )}
 
-          {/* Filters */}
+          {/* Search and Filters */}
           <Card className="mb-6 border-gray-200/60 bg-white/70 backdrop-blur-sm">
-            <CardContent className="p-4">
+            <CardContent className="p-4 space-y-4">
+              {/* Search Bar */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Input
+                  type="text"
+                  placeholder="Search tickets by title, description, or category..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                />
+              </div>
+              
+              {/* Filters */}
               <div className="flex items-center justify-between flex-wrap gap-4">
-                <div className="flex items-center gap-6 flex-wrap">
+                <div className="flex items-center gap-4 flex-wrap">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium text-gray-700">Filter by:</span>
                   </div>
-                <div className="flex items-center gap-2">
-                  <label className="text-sm font-medium text-gray-600">Status</label>
-                  <select
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                    className="px-3 py-2 bg-white border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                  >
-                    <option value="all">All</option>
-                    <option value="open">Open</option>
-                    <option value="in_progress">In Progress</option>
-                    <option value="resolved">Resolved</option>
-                    <option value="closed">Closed</option>
-                  </select>
-                </div>
-                <div className="flex items-center gap-2">
-                  <label className="text-sm font-medium text-gray-600">Priority</label>
-                  <select
-                    value={priorityFilter}
-                    onChange={(e) => setPriorityFilter(e.target.value)}
-                    className="px-3 py-2 bg-white border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                  >
-                    <option value="all">All</option>
-                    <option value="low">Low</option>
-                    <option value="medium">Medium</option>
-                    <option value="high">High</option>
-                    <option value="urgent">Urgent</option>
-                  </select>
-                </div>
-                  {(statusFilter !== "all" || priorityFilter !== "all") && (
+                  <div className="flex items-center gap-2">
+                    <label className="text-sm font-medium text-gray-600">Status</label>
+                    <Select value={statusFilter} onValueChange={setStatusFilter}>
+                      <SelectTrigger className="w-32 bg-white border-gray-300">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All</SelectItem>
+                        <SelectItem value="open">Open</SelectItem>
+                        <SelectItem value="in_progress">In Progress</SelectItem>
+                        <SelectItem value="resolved">Resolved</SelectItem>
+                        <SelectItem value="closed">Closed</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <label className="text-sm font-medium text-gray-600">Priority</label>
+                    <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+                      <SelectTrigger className="w-32 bg-white border-gray-300">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All</SelectItem>
+                        <SelectItem value="low">Low</SelectItem>
+                        <SelectItem value="medium">Medium</SelectItem>
+                        <SelectItem value="high">High</SelectItem>
+                        <SelectItem value="urgent">Urgent</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {(statusFilter !== "all" || priorityFilter !== "all" || searchQuery.trim() !== "") && (
                     <Button 
                       variant="outline" 
                       size="sm" 
                       onClick={() => {
                         setStatusFilter("all");
                         setPriorityFilter("all");
+                        setSearchQuery("");
                       }}
                       className="text-xs"
                     >
-                      Clear Filters
+                      Clear All
                     </Button>
                   )}
                 </div>
@@ -190,21 +226,23 @@ export default function MyTicketsPage() {
               </CardContent>
             </Card>
           ) : (
-            <div className="space-y-4">
-              {filteredTickets.map((ticket) => (
-                <TicketCard 
-                  key={ticket._id}
-                  ticket={ticket}
-                  // actions={
-                  //   <Link href={`/ticket/${ticket._id}`}>
-                  //     <Button variant="outline" size="sm" className="bg-white hover:bg-gray-50">
-                  //       View Details
-                  //     </Button>
-                  //   </Link>
-                  // }
-                />
-              ))}
-            </div>
+            <ScrollArea className="h-[600px] pr-4">
+              <div className="space-y-4 pb-4">
+                {filteredTickets.map((ticket: Ticket) => (
+                  <TicketCard 
+                    key={ticket._id}
+                    ticket={ticket}
+                  />
+                ))}
+                
+                {/* Show loading indicator if searching */}
+                {searchQuery.trim() && filteredTickets.length === 0 && tickets && tickets.length > 0 && (
+                  <div className="text-center py-8">
+                    <p className="text-gray-500">No tickets match your search criteria.</p>
+                  </div>
+                )}
+              </div>
+            </ScrollArea>
           )}
         </div>
       </PageLayout>

@@ -75,13 +75,26 @@ export const createTicket = mutation({
 export const getAllTickets = query({
   args: {
     currentUserId: v.optional(v.id("authUsers")),
+    search: v.optional(v.string()),
+    limit: v.optional(v.number()),
+    cursor: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const tickets = await ctx.db
+    let ticketsQuery = ctx.db
       .query("tickets")
       .withIndex("by_created_at")
-      .order("desc")
-      .collect();
+      .order("desc");
+
+    if (args.cursor) {
+      ticketsQuery = ticketsQuery.paginate({
+        cursor: args.cursor,
+        numItems: args.limit || 20,
+      });
+    }
+
+    const tickets = args.cursor 
+      ? (await ticketsQuery).page 
+      : await ticketsQuery.take(args.limit || 20);
     
     // Enrich with customer information and message count
     const enrichedTickets = await Promise.all(
@@ -126,7 +139,26 @@ export const getAllTickets = query({
       })
     );
     
-    return enrichedTickets;
+    // Filter by search term if provided
+    let filteredTickets = enrichedTickets;
+    if (args.search && args.search.trim() !== "") {
+      const searchTerm = args.search.toLowerCase().trim();
+      filteredTickets = enrichedTickets.filter(ticket => 
+        ticket.title.toLowerCase().includes(searchTerm) ||
+        ticket.description.toLowerCase().includes(searchTerm) ||
+        ticket.customer?.name?.toLowerCase().includes(searchTerm) ||
+        ticket.assignedAgent?.name?.toLowerCase().includes(searchTerm) ||
+        ticket.category?.toLowerCase().includes(searchTerm)
+      );
+    }
+    
+    return args.cursor 
+      ? { 
+          tickets: filteredTickets, 
+          nextCursor: (await ticketsQuery).nextCursor,
+          isDone: (await ticketsQuery).isDone 
+        }
+      : filteredTickets;
   },
 });
 
@@ -135,13 +167,26 @@ export const getCustomerTickets = query({
   args: { 
     customerId: v.id("authUsers"),
     currentUserId: v.optional(v.id("authUsers")),
+    search: v.optional(v.string()),
+    limit: v.optional(v.number()),
+    cursor: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const tickets = await ctx.db
+    let ticketsQuery = ctx.db
       .query("tickets")
       .withIndex("by_customer", (q) => q.eq("customerId", args.customerId))
-      .order("desc")
-      .collect();
+      .order("desc");
+
+    if (args.cursor) {
+      ticketsQuery = ticketsQuery.paginate({
+        cursor: args.cursor,
+        numItems: args.limit || 20,
+      });
+    }
+
+    const tickets = args.cursor 
+      ? (await ticketsQuery).page 
+      : await ticketsQuery.take(args.limit || 20);
     
     // Enrich with message count for conversation indicator
     const enrichedTickets = await Promise.all(
@@ -178,7 +223,24 @@ export const getCustomerTickets = query({
       })
     );
     
-    return enrichedTickets;
+    // Filter by search term if provided
+    let filteredTickets = enrichedTickets;
+    if (args.search && args.search.trim() !== "") {
+      const searchTerm = args.search.toLowerCase().trim();
+      filteredTickets = enrichedTickets.filter(ticket => 
+        ticket.title.toLowerCase().includes(searchTerm) ||
+        ticket.description.toLowerCase().includes(searchTerm) ||
+        ticket.category?.toLowerCase().includes(searchTerm)
+      );
+    }
+    
+    return args.cursor 
+      ? { 
+          tickets: filteredTickets, 
+          nextCursor: (await ticketsQuery).nextCursor,
+          isDone: (await ticketsQuery).isDone 
+        }
+      : filteredTickets;
   },
 });
 

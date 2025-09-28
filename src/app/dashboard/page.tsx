@@ -9,9 +9,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TicketCard } from "@/components/ui/ticket-card";
 import { KnowledgeBase } from "@/components/KnowledgeBase";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import type { Ticket } from "@/types";
 
 export default function DashboardPage() {
   const { data: session } = authClient.useSession();
@@ -26,6 +30,7 @@ export default function DashboardPage() {
   );
 
   const [activeTab, setActiveTab] = useState<"tickets" | "knowledge">("tickets");
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   // Redirect non-agents away from dashboard
   useEffect(() => {
@@ -72,6 +77,22 @@ export default function DashboardPage() {
     );
   }
 
+  // Filter tickets based on search query
+  const filteredTickets = useMemo(() => {
+    if (!tickets) return [];
+    
+    if (!searchQuery.trim()) return tickets;
+    
+    const searchTerm = searchQuery.toLowerCase().trim();
+    return tickets.filter((ticket: Ticket) => 
+      ticket.title.toLowerCase().includes(searchTerm) ||
+      ticket.description.toLowerCase().includes(searchTerm) ||
+      ticket.customer?.name?.toLowerCase().includes(searchTerm) ||
+      ticket.assignedAgent?.name?.toLowerCase().includes(searchTerm) ||
+      ticket.category?.toLowerCase().includes(searchTerm)
+    );
+  }, [tickets, searchQuery]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
       <PageLayout maxWidth="2xl">
@@ -87,13 +108,13 @@ export default function DashboardPage() {
           </div>
 
           {/* Quick Stats */}
-          {tickets.length > 0 && (
+          {tickets && tickets.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
               {[
                 { label: "Total", count: tickets.length, color: "bg-blue-50 text-blue-700", icon: "📊" },
-                { label: "Open", count: tickets.filter(t => t.status === "open").length, color: "bg-orange-50 text-orange-700", icon: "🔓" },
-                { label: "In Progress", count: tickets.filter(t => t.status === "in_progress").length, color: "bg-yellow-50 text-yellow-700", icon: "⚡" },
-                { label: "Resolved", count: tickets.filter(t => t.status === "resolved").length, color: "bg-green-50 text-green-700", icon: "✅" }
+                { label: "Open", count: tickets.filter((t: Ticket) => t.status === "open").length, color: "bg-orange-50 text-orange-700", icon: "🔓" },
+                { label: "In Progress", count: tickets.filter((t: Ticket) => t.status === "in_progress").length, color: "bg-yellow-50 text-yellow-700", icon: "⚡" },
+                { label: "Resolved", count: tickets.filter((t: Ticket) => t.status === "resolved").length, color: "bg-green-50 text-green-700", icon: "✅" }
               ].map((stat) => (
                 <Card key={stat.label} className="border-gray-200/60 bg-white/70 backdrop-blur-sm">
                   <CardContent className="p-6 text-center">
@@ -119,9 +140,9 @@ export default function DashboardPage() {
                   }`}
                 >
                   Support Tickets
-                  {tickets.length > 0 && (
+                  {tickets && tickets.length > 0 && (
                     <span className="ml-2 bg-gray-100 text-gray-900 py-0.5 px-2.5 rounded-full text-xs">
-                      {tickets.length}
+                      {searchQuery.trim() ? filteredTickets.length : tickets.length}
                     </span>
                   )}
                 </button>
@@ -142,7 +163,30 @@ export default function DashboardPage() {
           {/* Tab Content */}
           {activeTab === "tickets" ? (
             <div className="space-y-6">
-              {tickets.length === 0 ? (
+              {/* Search Bar for Tickets */}
+              {tickets && tickets.length > 0 && (
+                <Card className="border-gray-200/60 bg-white/70 backdrop-blur-sm">
+                  <CardContent className="p-4">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                      <Input
+                        type="text"
+                        placeholder="Search tickets by title, description, customer, agent, or category..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-10 bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                      />
+                    </div>
+                    {searchQuery.trim() && (
+                      <div className="mt-2 text-sm text-gray-600">
+                        Showing {filteredTickets.length} of {tickets.length} tickets
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+              
+              {!tickets || tickets.length === 0 ? (
                 <Card className="border-gray-200/60 bg-white/70 backdrop-blur-sm">
                   <CardContent className="text-center py-16">
                     <div className="w-20 h-20 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
@@ -157,18 +201,42 @@ export default function DashboardPage() {
                   </CardContent>
                 </Card>
               ) : (
-                <div className="space-y-4">
-                  {tickets.map((ticket) => (
-                    <TicketCard 
-                      key={ticket._id}
-                      ticket={ticket}
-                      showCustomer={true}
-                      showAgent={true}
-                      showStatusDropdown={true}
-                      actions={null}
-                    />
-                  ))}
-                </div>
+                <ScrollArea className="h-[600px] pr-4">
+                  <div className="space-y-4 pb-4">
+                    {filteredTickets.map((ticket: Ticket) => (
+                      <TicketCard 
+                        key={ticket._id}
+                        ticket={ticket}
+                        showCustomer={true}
+                        showAgent={true}
+                        showStatusDropdown={true}
+                        actions={null}
+                      />
+                    ))}
+                    
+                    {/* Show message when search returns no results */}
+                    {searchQuery.trim() && filteredTickets.length === 0 && tickets && tickets.length > 0 && (
+                      <Card className="border-gray-200/60 bg-white/70 backdrop-blur-sm">
+                        <CardContent className="text-center py-16">
+                          <div className="w-20 h-20 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                            <Search className="w-10 h-10 text-gray-400" />
+                          </div>
+                          <h3 className="text-xl font-semibold text-gray-900 mb-2">No matching tickets</h3>
+                          <p className="text-gray-600 mb-4">
+                            No tickets match your search criteria. Try adjusting your search terms.
+                          </p>
+                          <Button 
+                            variant="outline" 
+                            onClick={() => setSearchQuery("")}
+                            className="text-sm"
+                          >
+                            Clear Search
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
+                </ScrollArea>
               )}
             </div>
           ) : (

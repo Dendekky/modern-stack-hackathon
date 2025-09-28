@@ -33,6 +33,12 @@ export interface Ticket {
   };
   isVoiceTicket?: boolean;
   voiceTranscript?: string;
+  // Extended fields from queries
+  customer?: User;
+  assignedAgent?: User;
+  messageCount?: number;
+  hasConversation?: boolean;
+  unreadCount?: number;
 }
 
 export interface Message {
