@@ -69,6 +69,18 @@ export default function MyTicketsPage() {
     );
   }
 
+  // Show loading state while fetching user data
+  if (me === undefined) {
+    return (
+      <PageLayout>
+        <div className="flex items-center justify-center py-16">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <span className="ml-2">Loading user data...</span>
+        </div>
+      </PageLayout>
+    );
+  }
+
   if (!me || me.role !== "customer") {
     return (
       <PageLayout>
