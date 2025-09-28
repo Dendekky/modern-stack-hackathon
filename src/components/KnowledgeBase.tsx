@@ -1,19 +1,41 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo } from "react";
 import { useQuery, useMutation, useAction } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Trash2, ExternalLink, Search, Globe, FileText, Tag } from "lucide-react";
 
-export function KnowledgeBase() {
-  const [isScrapingWebsite, setIsScrapingWebsite] = useState(false);
-  const [isScrapingPage, setIsScrapingPage] = useState(false);
-  const [websiteUrl, setWebsiteUrl] = useState("");
-  const [pageUrl, setPageUrl] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [scrapeResult, setScrapeResult] = useState<string | null>(null);
+interface KnowledgeBaseProps {
+  searchTerm: string;
+  setSearchTerm: (term: string) => void;
+  websiteUrl: string;
+  setWebsiteUrl: (url: string) => void;
+  pageUrl: string;
+  setPageUrl: (url: string) => void;
+  scrapeResult: string | null;
+  setScrapeResult: (result: string | null) => void;
+  isScrapingWebsite: boolean;
+  setIsScrapingWebsite: (scraping: boolean) => void;
+  isScrapingPage: boolean;
+  setIsScrapingPage: (scraping: boolean) => void;
+}
+
+export function KnowledgeBase({
+  searchTerm,
+  setSearchTerm,
+  websiteUrl,
+  setWebsiteUrl,
+  pageUrl,
+  setPageUrl,
+  scrapeResult,
+  setScrapeResult,
+  isScrapingWebsite,
+  setIsScrapingWebsite,
+  isScrapingPage,
+  setIsScrapingPage,
+}: KnowledgeBaseProps) {
 
   const documents = useQuery(api.knowledgeBase.getAllDocuments);
   const searchResults = useQuery(
@@ -25,7 +47,11 @@ export function KnowledgeBase() {
   const scrapePage = useAction(api.firecrawl.scrapePage);
   const deleteDocument = useMutation(api.knowledgeBase.deleteDocument);
 
-  const displayedDocuments = searchTerm ? (searchResults || []) : (documents || []);
+  const displayedDocuments = useMemo(() => {
+    return searchTerm ? searchResults : documents;
+  }, [searchTerm, searchResults, documents]);
+  
+  const isLoading = searchTerm ? searchResults === undefined : documents === undefined;
 
   const handleScrapeWebsite = async () => {
     if (!websiteUrl.trim()) return;
@@ -187,7 +213,7 @@ export function KnowledgeBase() {
             Knowledge Base Documents
           </CardTitle>
           <CardDescription>
-            Search and manage your scraped documents ({documents?.length || 0} total)
+            Search and manage your scraped documents ({isLoading ? "loading..." : `${documents?.length || 0} total`})
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -204,12 +230,12 @@ export function KnowledgeBase() {
           </div>
 
           {/* Documents List */}
-          {displayedDocuments === undefined ? (
+          {isLoading ? (
             <div className="flex items-center justify-center py-8">
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
               <span className="ml-2">Loading documents...</span>
             </div>
-          ) : displayedDocuments.length === 0 ? (
+          ) : !displayedDocuments || displayedDocuments.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
               {searchTerm ? "No documents found matching your search." : "No documents in knowledge base. Start by scraping a website or page above."}
             </div>

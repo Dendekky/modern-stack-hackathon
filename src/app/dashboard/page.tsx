@@ -31,6 +31,14 @@ export default function DashboardPage() {
 
   const [activeTab, setActiveTab] = useState<"tickets" | "knowledge">("tickets");
   const [searchQuery, setSearchQuery] = useState<string>("");
+  
+  // Knowledge Base state
+  const [knowledgeSearchTerm, setKnowledgeSearchTerm] = useState("");
+  const [websiteUrl, setWebsiteUrl] = useState("");
+  const [pageUrl, setPageUrl] = useState("");
+  const [scrapeResult, setScrapeResult] = useState<string | null>(null);
+  const [isScrapingWebsite, setIsScrapingWebsite] = useState(false);
+  const [isScrapingPage, setIsScrapingPage] = useState(false);
 
   // Filter tickets based on search query - moved before early returns to satisfy hooks rules
   const filteredTickets = useMemo(() => {
@@ -253,7 +261,20 @@ export default function DashboardPage() {
             </div>
           ) : (
             <div>
-              <KnowledgeBase />
+              <KnowledgeBase 
+                searchTerm={knowledgeSearchTerm}
+                setSearchTerm={setKnowledgeSearchTerm}
+                websiteUrl={websiteUrl}
+                setWebsiteUrl={setWebsiteUrl}
+                pageUrl={pageUrl}
+                setPageUrl={setPageUrl}
+                scrapeResult={scrapeResult}
+                setScrapeResult={setScrapeResult}
+                isScrapingWebsite={isScrapingWebsite}
+                setIsScrapingWebsite={setIsScrapingWebsite}
+                isScrapingPage={isScrapingPage}
+                setIsScrapingPage={setIsScrapingPage}
+              />
             </div>
           )}
         </div>
