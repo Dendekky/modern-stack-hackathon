@@ -25,11 +25,10 @@ export function Navigation() {
 
   const navLinks = me.role === "customer" 
     ? [
-        { href: "/my-tickets", label: "My Tickets" },
-        { href: "/create-ticket", label: "Create Ticket" }
+        { href: "/my-tickets", label: "My Tickets" }
       ]
     : [
-        { href: "/", label: "Dashboard" }
+        { href: "/dashboard", label: "Dashboard" }
       ];
 
   return (
@@ -38,7 +37,7 @@ export function Navigation() {
         <div className="flex items-center justify-between h-20">
           {/* Logo/Brand */}
           <Link 
-            href={me.role === "customer" ? "/my-tickets" : "/"} 
+            href={me.role === "customer" ? "/my-tickets" : "/dashboard"} 
             className="flex items-center gap-3 hover:opacity-80 transition-all duration-200"
           >
             <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-sm">

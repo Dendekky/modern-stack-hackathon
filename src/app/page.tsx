@@ -1,8 +1,4 @@
 "use client";
-import { TicketForm } from "@/components/TicketForm";
-import { TicketDashboard } from "@/components/TicketDashboard";
-import { DemoSetup } from "@/components/DemoSetup";
-import { KnowledgeBase } from "@/components/KnowledgeBase";
 import { PageLayout } from "@/components/ui/page-layout";
 import { authClient } from "@/lib/auth-client";
 import { useQuery } from "convex/react";
@@ -20,10 +16,12 @@ export default function Home() {
 
   const isAgent = me?.role === "agent";
 
-  // Redirect customers to their tickets dashboard
+  // Redirect users based on their role
   useEffect(() => {
     if (me && me.role === "customer") {
       router.push("/my-tickets");
+    } else if (me && me.role === "agent") {
+      router.push("/dashboard");
     }
   }, [me, router]);
 
@@ -47,40 +45,13 @@ export default function Home() {
           </p>
         </div>
 
-        {/* Demo Setup */}
-        <div className="mb-16">
-          <DemoSetup />
-        </div>
-
-        {/* Main Content */}
-        <div className="space-y-16">
-          {isAgent ? (
-            <div>
-              <div className="text-center mb-8">
-                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">Agent Dashboard</h2>
-                <p className="text-gray-600 text-lg">Manage and respond to customer support tickets</p>
-              </div>
-              <TicketDashboard />
-            </div>
-          ) : (
-            <div>
-              <div className="text-center mb-8">
-                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">Create Support Ticket</h2>
-                <p className="text-gray-600 text-lg">Get help from our support team</p>
-              </div>
-              <TicketForm />
-            </div>
-          )}
-
-          {/* Knowledge Base Section */}
-          <div>
-            <div className="text-center mb-8">
-              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">Knowledge Base</h2>
-              <p className="text-gray-600 text-lg">Find answers to common questions</p>
-            </div>
-            <KnowledgeBase />
+        {/* Loading state or fallback for users without specific roles */}
+        {!me && (
+          <div className="text-center py-16">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading...</p>
           </div>
-        </div>
+        )}
 
         {/* Status Footer */}
         <div className="text-center py-16 mt-24">

@@ -6,7 +6,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { TicketCard } from "@/components/ui/ticket-card";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
-import Link from "next/link";
 
 export function TicketDashboard() {
   const { data: session, isPending } = authClient.useSession();
@@ -65,11 +64,9 @@ export function TicketDashboard() {
             <p className="text-gray-600 mb-8 max-w-md mx-auto">
               Tickets will appear here when customers create them. Get started by creating a test ticket.
             </p>
-            <Link href="/create-ticket">
-              <Button variant="outline" className="bg-white hover:bg-gray-50">
-                Create Test Ticket
-              </Button>
-            </Link>
+            <p className="text-sm text-gray-500">
+              Customers can create tickets from their dashboard.
+            </p>
           </CardContent>
         </Card>
       ) : (

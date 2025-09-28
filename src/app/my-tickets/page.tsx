@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { PageLayout } from "@/components/ui/page-layout";
 import { PageHeader } from "@/components/ui/page-header";
 import { TicketCard } from "@/components/ui/ticket-card";
+import { CreateTicketModal } from "@/components/CreateTicketModal";
+import { DialogTrigger } from "@/components/ui/dialog";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -25,6 +27,7 @@ export default function MyTicketsPage() {
 
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [priorityFilter, setPriorityFilter] = useState<string>("all");
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   if (!session) {
     return (
@@ -65,23 +68,18 @@ export default function MyTicketsPage() {
       <PageLayout maxWidth="2xl">
         <div className="py-12">
           {/* Header */}
-          <div className="text-center mb-12">
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          <div className="mb-8">
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
               My Support Tickets
             </h1>
-            <p className="text-lg text-gray-600 mb-8">
+            <p className="text-lg text-gray-600">
               Track and manage your support requests
             </p>
-            <Link href="/create-ticket">
-              <Button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5">
-                Create New Ticket
-              </Button>
-            </Link>
           </div>
 
           {/* Quick Stats */}
           {tickets && tickets.length > 0 && (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
               {[
                 { label: "Total", count: tickets.length, color: "bg-blue-50 text-blue-700", icon: "📊" },
                 { label: "Active", count: tickets.filter(t => t.status === "open" || t.status === "in_progress").length, color: "bg-orange-50 text-orange-700", icon: "⚡" },
@@ -89,10 +87,10 @@ export default function MyTicketsPage() {
                 { label: "Closed", count: tickets.filter(t => t.status === "closed").length, color: "bg-gray-50 text-gray-700", icon: "📁" }
               ].map((stat) => (
                 <Card key={stat.label} className="border-gray-200/60 bg-white/70 backdrop-blur-sm">
-                  <CardContent className="p-6 text-center">
-                    <div className="text-2xl mb-2">{stat.icon}</div>
-                    <div className="text-2xl font-bold text-gray-900 mb-1">{stat.count}</div>
-                    <p className="text-sm font-medium text-gray-600">{stat.label}</p>
+                  <CardContent className="p-4 text-center">
+                    <div className="text-xl mb-1">{stat.icon}</div>
+                    <div className="text-xl font-bold text-gray-900 mb-1">{stat.count}</div>
+                    <p className="text-xs font-medium text-gray-600">{stat.label}</p>
                   </CardContent>
                 </Card>
               ))}
@@ -100,12 +98,13 @@ export default function MyTicketsPage() {
           )}
 
           {/* Filters */}
-          <Card className="mb-8 border-gray-200/60 bg-white/70 backdrop-blur-sm">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-6 flex-wrap">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-gray-700">Filter by:</span>
-                </div>
+          <Card className="mb-6 border-gray-200/60 bg-white/70 backdrop-blur-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <div className="flex items-center gap-6 flex-wrap">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-gray-700">Filter by:</span>
+                  </div>
                 <div className="flex items-center gap-2">
                   <label className="text-sm font-medium text-gray-600">Status</label>
                   <select
@@ -134,19 +133,33 @@ export default function MyTicketsPage() {
                     <option value="urgent">Urgent</option>
                   </select>
                 </div>
-                {(statusFilter !== "all" || priorityFilter !== "all") && (
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => {
-                      setStatusFilter("all");
-                      setPriorityFilter("all");
-                    }}
-                    className="text-xs"
-                  >
-                    Clear Filters
-                  </Button>
-                )}
+                  {(statusFilter !== "all" || priorityFilter !== "all") && (
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => {
+                        setStatusFilter("all");
+                        setPriorityFilter("all");
+                      }}
+                      className="text-xs"
+                    >
+                      Clear Filters
+                    </Button>
+                  )}
+                </div>
+                
+                {/* Create New Ticket Button */}
+                <CreateTicketModal 
+                  open={isCreateModalOpen} 
+                  onOpenChange={setIsCreateModalOpen}
+                  trigger={
+                    <DialogTrigger asChild>
+                      <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+                        Create New Ticket
+                      </Button>
+                    </DialogTrigger>
+                  }
+                />
               </div>
             </CardContent>
           </Card>
@@ -166,11 +179,14 @@ export default function MyTicketsPage() {
                     ? "You haven't created any support tickets yet. Create your first ticket to get started." 
                     : "No tickets match your current filters. Try adjusting your filter criteria."}
                 </p>
-                <Link href="/create-ticket">
-                  <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+                {tickets?.length === 0 && (
+                  <Button 
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                    onClick={() => setIsCreateModalOpen(true)}
+                  >
                     Create Your First Ticket
                   </Button>
-                </Link>
+                )}
               </CardContent>
             </Card>
           ) : (
@@ -179,13 +195,13 @@ export default function MyTicketsPage() {
                 <TicketCard 
                   key={ticket._id}
                   ticket={ticket}
-                  actions={
-                    <Link href={`/ticket/${ticket._id}`}>
-                      <Button variant="outline" size="sm" className="bg-white hover:bg-gray-50">
-                        View Details
-                      </Button>
-                    </Link>
-                  }
+                  // actions={
+                  //   <Link href={`/ticket/${ticket._id}`}>
+                  //     <Button variant="outline" size="sm" className="bg-white hover:bg-gray-50">
+                  //       View Details
+                  //     </Button>
+                  //   </Link>
+                  // }
                 />
               ))}
             </div>
