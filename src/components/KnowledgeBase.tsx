@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { useQuery, useMutation, useAction } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { DeleteConfirmDialog } from "@/components/ui/delete-confirm-dialog";
 import { Trash2, ExternalLink, Search, Globe, FileText, Tag } from "lucide-react";
 import type { KnowledgeBase as KnowledgeBaseDoc } from "@/types";
 
@@ -39,6 +40,10 @@ export function KnowledgeBase({
   isScrapingPage,
   setIsScrapingPage,
 }: KnowledgeBaseProps) {
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [documentToDelete, setDocumentToDelete] = useState<KnowledgeBaseDoc | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const searchResults = useQuery(
     api.knowledgeBase.searchDocuments,
     searchTerm ? { searchTerm } : "skip"
@@ -116,13 +121,22 @@ export function KnowledgeBase({
     }
   };
 
-  const handleDeleteDocument = async (id: string) => {
-    if (confirm("Are you sure you want to delete this document?")) {
-      try {
-        await deleteDocument({ id: id as any });
-      } catch (error) {
-        console.error("Failed to delete document:", error);
-      }
+  const handleDeleteClick = (document: KnowledgeBaseDoc) => {
+    setDocumentToDelete(document);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!documentToDelete) return;
+    
+    setIsDeleting(true);
+    try {
+      await deleteDocument({ id: documentToDelete._id as any });
+      setDocumentToDelete(null);
+    } catch (error) {
+      console.error("Failed to delete document:", error);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -266,8 +280,9 @@ export function KnowledgeBase({
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleDeleteDocument(doc._id)}
+                      onClick={() => handleDeleteClick(doc)}
                       className="text-red-600 hover:text-red-800"
+                      disabled={isDeleting}
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>
@@ -303,6 +318,17 @@ export function KnowledgeBase({
           )}
         </CardContent>
       </Card>
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        title="Delete Document"
+        itemName={documentToDelete?.title}
+        description={`Are you sure you want to delete "${documentToDelete?.title}"? This will permanently remove it from your knowledge base and cannot be undone.`}
+        onConfirm={handleConfirmDelete}
+        isLoading={isDeleting}
+      />
     </div>
   );
 }
