@@ -80,21 +80,23 @@ export const getAllTickets = query({
     cursor: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    let ticketsQuery = ctx.db
+    const ticketsQuery = ctx.db
       .query("tickets")
       .withIndex("by_created_at")
       .order("desc");
 
+    let tickets;
+    let paginationResult;
+    
     if (args.cursor) {
-      ticketsQuery = ticketsQuery.paginate({
+      paginationResult = await ticketsQuery.paginate({
         cursor: args.cursor,
         numItems: args.limit || 20,
       });
+      tickets = paginationResult.page;
+    } else {
+      tickets = await ticketsQuery.take(args.limit || 20);
     }
-
-    const tickets = args.cursor 
-      ? (await ticketsQuery).page 
-      : await ticketsQuery.take(args.limit || 20);
     
     // Enrich with customer information and message count
     const enrichedTickets = await Promise.all(
@@ -152,13 +154,7 @@ export const getAllTickets = query({
       );
     }
     
-    return args.cursor 
-      ? { 
-          tickets: filteredTickets, 
-          nextCursor: (await ticketsQuery).nextCursor,
-          isDone: (await ticketsQuery).isDone 
-        }
-      : filteredTickets;
+    return filteredTickets;
   },
 });
 
@@ -172,21 +168,23 @@ export const getCustomerTickets = query({
     cursor: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    let ticketsQuery = ctx.db
+    const ticketsQuery = ctx.db
       .query("tickets")
       .withIndex("by_customer", (q) => q.eq("customerId", args.customerId))
       .order("desc");
 
+    let tickets;
+    let paginationResult;
+    
     if (args.cursor) {
-      ticketsQuery = ticketsQuery.paginate({
+      paginationResult = await ticketsQuery.paginate({
         cursor: args.cursor,
         numItems: args.limit || 20,
       });
+      tickets = paginationResult.page;
+    } else {
+      tickets = await ticketsQuery.take(args.limit || 20);
     }
-
-    const tickets = args.cursor 
-      ? (await ticketsQuery).page 
-      : await ticketsQuery.take(args.limit || 20);
     
     // Enrich with message count for conversation indicator
     const enrichedTickets = await Promise.all(
@@ -234,13 +232,7 @@ export const getCustomerTickets = query({
       );
     }
     
-    return args.cursor 
-      ? { 
-          tickets: filteredTickets, 
-          nextCursor: (await ticketsQuery).nextCursor,
-          isDone: (await ticketsQuery).isDone 
-        }
-      : filteredTickets;
+    return filteredTickets;
   },
 });
 

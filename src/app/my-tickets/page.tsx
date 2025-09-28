@@ -35,6 +35,27 @@ export default function MyTicketsPage() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
+  // Filter tickets based on selected filters and search - moved before early returns to satisfy hooks rules
+  const filteredTickets = useMemo(() => {
+    if (!tickets) return [];
+    
+    return tickets.filter((ticket) => {
+      const statusMatch = statusFilter === "all" || ticket.status === statusFilter;
+      const priorityMatch = priorityFilter === "all" || ticket.priority === priorityFilter;
+      
+      let searchMatch = true;
+      if (searchQuery.trim()) {
+        const searchTerm = searchQuery.toLowerCase().trim();
+        searchMatch = 
+          ticket.title.toLowerCase().includes(searchTerm) ||
+          ticket.description.toLowerCase().includes(searchTerm) ||
+          (ticket.category?.toLowerCase().includes(searchTerm) ?? false);
+      }
+      
+      return statusMatch && priorityMatch && searchMatch;
+    });
+  }, [tickets, statusFilter, priorityFilter, searchQuery]);
+
   if (!session) {
     return (
       <PageLayout>
@@ -62,27 +83,6 @@ export default function MyTicketsPage() {
     );
   }
 
-  // Filter tickets based on selected filters and search
-  const filteredTickets = useMemo(() => {
-    if (!tickets) return [];
-    
-    return tickets.filter((ticket: Ticket) => {
-      const statusMatch = statusFilter === "all" || ticket.status === statusFilter;
-      const priorityMatch = priorityFilter === "all" || ticket.priority === priorityFilter;
-      
-      let searchMatch = true;
-      if (searchQuery.trim()) {
-        const searchTerm = searchQuery.toLowerCase().trim();
-        searchMatch = 
-          ticket.title.toLowerCase().includes(searchTerm) ||
-          ticket.description.toLowerCase().includes(searchTerm) ||
-          (ticket.category?.toLowerCase().includes(searchTerm) ?? false);
-      }
-      
-      return statusMatch && priorityMatch && searchMatch;
-    });
-  }, [tickets, statusFilter, priorityFilter, searchQuery]);
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
       <PageLayout maxWidth="2xl">
@@ -102,9 +102,9 @@ export default function MyTicketsPage() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
               {[
                 { label: "Total", count: tickets.length, color: "bg-blue-50 text-blue-700", icon: "📊" },
-                { label: "Active", count: tickets.filter((t: Ticket) => t.status === "open" || t.status === "in_progress").length, color: "bg-orange-50 text-orange-700", icon: "⚡" },
-                { label: "Resolved", count: tickets.filter((t: Ticket) => t.status === "resolved").length, color: "bg-green-50 text-green-700", icon: "✅" },
-                { label: "Closed", count: tickets.filter((t: Ticket) => t.status === "closed").length, color: "bg-gray-50 text-gray-700", icon: "📁" }
+                { label: "Active", count: tickets.filter((t) => t.status === "open" || t.status === "in_progress").length, color: "bg-orange-50 text-orange-700", icon: "⚡" },
+                { label: "Resolved", count: tickets.filter((t) => t.status === "resolved").length, color: "bg-green-50 text-green-700", icon: "✅" },
+                { label: "Closed", count: tickets.filter((t) => t.status === "closed").length, color: "bg-gray-50 text-gray-700", icon: "📁" }
               ].map((stat) => (
                 <Card key={stat.label} className="border-gray-200/60 bg-white/70 backdrop-blur-sm">
                   <CardContent className="p-4 text-center">
@@ -228,7 +228,7 @@ export default function MyTicketsPage() {
           ) : (
             <ScrollArea className="h-[600px] pr-4">
               <div className="space-y-4 pb-4">
-                {filteredTickets.map((ticket: Ticket) => (
+                {filteredTickets.map((ticket) => (
                   <TicketCard 
                     key={ticket._id}
                     ticket={ticket}

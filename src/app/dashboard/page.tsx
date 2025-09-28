@@ -32,6 +32,22 @@ export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState<"tickets" | "knowledge">("tickets");
   const [searchQuery, setSearchQuery] = useState<string>("");
 
+  // Filter tickets based on search query - moved before early returns to satisfy hooks rules
+  const filteredTickets = useMemo(() => {
+    if (!tickets) return [];
+    
+    if (!searchQuery.trim()) return tickets;
+    
+    const searchTerm = searchQuery.toLowerCase().trim();
+    return tickets.filter((ticket) => 
+      ticket.title.toLowerCase().includes(searchTerm) ||
+      ticket.description.toLowerCase().includes(searchTerm) ||
+      ticket.customer?.name?.toLowerCase().includes(searchTerm) ||
+      ticket.assignedAgent?.name?.toLowerCase().includes(searchTerm) ||
+      ticket.category?.toLowerCase().includes(searchTerm)
+    );
+  }, [tickets, searchQuery]);
+
   // Redirect non-agents away from dashboard
   useEffect(() => {
     if (me && me.role !== "agent") {
@@ -77,22 +93,6 @@ export default function DashboardPage() {
     );
   }
 
-  // Filter tickets based on search query
-  const filteredTickets = useMemo(() => {
-    if (!tickets) return [];
-    
-    if (!searchQuery.trim()) return tickets;
-    
-    const searchTerm = searchQuery.toLowerCase().trim();
-    return tickets.filter((ticket: Ticket) => 
-      ticket.title.toLowerCase().includes(searchTerm) ||
-      ticket.description.toLowerCase().includes(searchTerm) ||
-      ticket.customer?.name?.toLowerCase().includes(searchTerm) ||
-      ticket.assignedAgent?.name?.toLowerCase().includes(searchTerm) ||
-      ticket.category?.toLowerCase().includes(searchTerm)
-    );
-  }, [tickets, searchQuery]);
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
       <PageLayout maxWidth="2xl">
@@ -112,9 +112,9 @@ export default function DashboardPage() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
               {[
                 { label: "Total", count: tickets.length, color: "bg-blue-50 text-blue-700", icon: "📊" },
-                { label: "Open", count: tickets.filter((t: Ticket) => t.status === "open").length, color: "bg-orange-50 text-orange-700", icon: "🔓" },
-                { label: "In Progress", count: tickets.filter((t: Ticket) => t.status === "in_progress").length, color: "bg-yellow-50 text-yellow-700", icon: "⚡" },
-                { label: "Resolved", count: tickets.filter((t: Ticket) => t.status === "resolved").length, color: "bg-green-50 text-green-700", icon: "✅" }
+                { label: "Open", count: tickets.filter((t) => t.status === "open").length, color: "bg-orange-50 text-orange-700", icon: "🔓" },
+                { label: "In Progress", count: tickets.filter((t) => t.status === "in_progress").length, color: "bg-yellow-50 text-yellow-700", icon: "⚡" },
+                { label: "Resolved", count: tickets.filter((t) => t.status === "resolved").length, color: "bg-green-50 text-green-700", icon: "✅" }
               ].map((stat) => (
                 <Card key={stat.label} className="border-gray-200/60 bg-white/70 backdrop-blur-sm">
                   <CardContent className="p-6 text-center">
@@ -203,7 +203,7 @@ export default function DashboardPage() {
               ) : (
                 <ScrollArea className="h-[600px] pr-4">
                   <div className="space-y-4 pb-4">
-                    {filteredTickets.map((ticket: Ticket) => (
+                    {filteredTickets.map((ticket) => (
                       <TicketCard 
                         key={ticket._id}
                         ticket={ticket}

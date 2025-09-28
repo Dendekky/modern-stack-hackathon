@@ -6,10 +6,10 @@ export type TicketPriority = "low" | "medium" | "high" | "urgent";
 
 export interface User {
   _id: string;
-  email: string;
-  name: string;
-  role: UserRole;
-  plan?: UserPlan;
+  email?: string;
+  name?: string | null;
+  role?: UserRole | null;
+  plan?: UserPlan | null;
   createdAt: number;
 }
 
@@ -34,8 +34,8 @@ export interface Ticket {
   isVoiceTicket?: boolean;
   voiceTranscript?: string;
   // Extended fields from queries
-  customer?: User;
-  assignedAgent?: User;
+  customer?: User | null;
+  assignedAgent?: User | null;
   messageCount?: number;
   hasConversation?: boolean;
   unreadCount?: number;
