@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { createPortal } from "react-dom"
 import { cn } from "@/lib/utils"
 
 interface DialogContextType {
@@ -85,6 +86,11 @@ interface DialogContentProps extends React.HTMLAttributes<HTMLDivElement> {
 const DialogContent = React.forwardRef<HTMLDivElement, DialogContentProps>(
   ({ className, children, ...props }, ref) => {
     const { open, setOpen } = useDialog()
+    const [mounted, setMounted] = React.useState(false)
+
+    React.useEffect(() => {
+      setMounted(true)
+    }, [])
 
     React.useEffect(() => {
       const handleEscape = (event: KeyboardEvent) => {
@@ -104,13 +110,13 @@ const DialogContent = React.forwardRef<HTMLDivElement, DialogContentProps>(
       }
     }, [open, setOpen])
 
-    if (!open) return null
+    if (!open || !mounted) return null
 
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center">
+    const modalContent = (
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center">
         {/* Backdrop */}
         <div 
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9998]"
           onClick={() => setOpen(false)}
         />
         
@@ -118,7 +124,7 @@ const DialogContent = React.forwardRef<HTMLDivElement, DialogContentProps>(
         <div
           ref={ref}
           className={cn(
-            "relative bg-white rounded-lg shadow-lg max-w-lg w-full mx-4 max-h-[90vh] overflow-auto",
+            "relative bg-white rounded-lg shadow-lg max-w-lg w-full mx-4 max-h-[90vh] overflow-auto z-[9999]",
             className
           )}
           {...props}
@@ -127,6 +133,8 @@ const DialogContent = React.forwardRef<HTMLDivElement, DialogContentProps>(
         </div>
       </div>
     )
+
+    return createPortal(modalContent, document.body)
   }
 )
 DialogContent.displayName = "DialogContent"
