@@ -154,6 +154,18 @@ export default function TicketDetailPage({ params }: TicketDetailPageProps) {
     );
   }
 
+  // Show loading state while fetching user data (needed to check canViewTicket)
+  if (me === undefined) {
+    return (
+      <PageLayout>
+        <div className="flex items-center justify-center py-16">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <span className="ml-2">Loading ticket...</span>
+        </div>
+      </PageLayout>
+    );
+  }
+
   if (!canViewTicket) {
     return (
       <PageLayout>
