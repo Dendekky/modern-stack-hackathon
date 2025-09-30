@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PageLayout } from "@/components/ui/page-layout";
 import { AISuggestions } from "@/components/AISuggestions";
+import { TicketDetailSkeleton } from "@/components/skeletons/TicketDetailSkeleton";
 import { formatDate, formatStatus } from "@/lib/ui-utils";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
@@ -132,13 +133,7 @@ export default function TicketDetailPage({ params }: TicketDetailPageProps) {
 
   // Show loading while resolving params
   if (!ticketId) {
-    return (
-      <PageLayout>
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Loading...</h1>
-        </div>
-      </PageLayout>
-    );
+    return <TicketDetailSkeleton />;
   }
 
   if (!session) {
@@ -156,14 +151,7 @@ export default function TicketDetailPage({ params }: TicketDetailPageProps) {
 
   // Show loading state while fetching user data (needed to check canViewTicket)
   if (me === undefined) {
-    return (
-      <PageLayout>
-        <div className="flex items-center justify-center py-16">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <span className="ml-2">Loading ticket...</span>
-        </div>
-      </PageLayout>
-    );
+    return <TicketDetailSkeleton />;
   }
 
   if (!canViewTicket) {

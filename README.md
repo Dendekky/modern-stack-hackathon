@@ -1,6 +1,6 @@
 # Modern Stack Hackathon - Support Ticketing System
 
-A modern customer support ticketing system built with Next.js, Convex, Better-Auth, and Resend.
+A modern customer support ticketing system built with Next.js, Convex, Better-Auth, and Resend, and OPENAI.
 
 ## Conversation Model
 

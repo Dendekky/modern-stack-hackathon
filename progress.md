@@ -120,19 +120,19 @@
   - ✅ Subtle hover animations and improved interaction feedback
 
 ## 📋 Next Steps
-1. **Autumn Integration** - Pro plan monetization
-2. **Vapi Voice Features** - Voice ticketing for Pro users
-3. **Analytics Dashboard** - Reporting and metrics (stretch goal)
+1. (Future) **Autumn Integration** - Pro plan monetization
+2. (Future) **Vapi Voice Features** - Voice ticketing for Pro users
+3. (Stretch) **Analytics Dashboard** - Reporting and metrics
 
 ## 🎯 Demo Flow Status
 - ✅ Basic ticket submission and dashboard
-- ✅ Email notifications (simulated)
+- ✅ Email notifications (Resend live)
 - ✅ AI enhancements (categorization, priority detection, suggested replies)
 - ✅ Knowledge base integration with document scraping and search
 - ✅ Authentication and roles (Better-Auth email/password, AuthGate, Convex role gating)
 - ✅ AI replies are visible in the conversation for both agents and customers
-- ⏳ Pro feature monetization
-- ⏳ Voice ticketing unlock
+- ⏳ Pro feature monetization (Autumn)
+- ⏳ Voice ticketing unlock (Vapi)
 
 ## 🛠️ Technical Notes
 - Using Convex for real-time backend with local development setup

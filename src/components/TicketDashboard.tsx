@@ -5,6 +5,7 @@ import { api } from "../../convex/_generated/api";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { TicketCard } from "@/components/ui/ticket-card";
 import { Button } from "@/components/ui/button";
+import { Skeleton, SkeletonCard, SkeletonText } from "@/components/ui/skeleton";
 import { authClient } from "@/lib/auth-client";
 
 export function TicketDashboard() {
@@ -21,14 +22,26 @@ export function TicketDashboard() {
   if (tickets === undefined) {
     return (
       <div className="space-y-6">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-              <span className="ml-2">Loading tickets...</span>
+        <SkeletonCard>
+          <div className="space-y-4">
+            <Skeleton className="h-6 w-48" />
+            <SkeletonText lines={3} />
+            <div className="flex gap-2">
+              <Skeleton className="h-6 w-16 rounded-full" />
+              <Skeleton className="h-6 w-20 rounded-full" />
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </SkeletonCard>
+        <SkeletonCard>
+          <div className="space-y-4">
+            <Skeleton className="h-6 w-48" />
+            <SkeletonText lines={3} />
+            <div className="flex gap-2">
+              <Skeleton className="h-6 w-16 rounded-full" />
+              <Skeleton className="h-6 w-20 rounded-full" />
+            </div>
+          </div>
+        </SkeletonCard>
       </div>
     );
   }

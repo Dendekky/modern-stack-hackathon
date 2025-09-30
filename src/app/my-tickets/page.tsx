@@ -9,6 +9,7 @@ import { PageLayout } from "@/components/ui/page-layout";
 import { PageHeader } from "@/components/ui/page-header";
 import { TicketCard } from "@/components/ui/ticket-card";
 import { CreateTicketModal } from "@/components/CreateTicketModal";
+import { MyTicketsSkeleton } from "@/components/skeletons/MyTicketsSkeleton";
 import { DialogTrigger } from "@/components/ui/dialog";
 import Link from "next/link";
 import { useState, useMemo } from "react";
@@ -71,14 +72,7 @@ export default function MyTicketsPage() {
 
   // Show loading state while fetching user data
   if (me === undefined) {
-    return (
-      <PageLayout>
-        <div className="flex items-center justify-center py-16">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <span className="ml-2">Loading user data...</span>
-        </div>
-      </PageLayout>
-    );
+    return <MyTicketsSkeleton />;
   }
 
   if (!me || me.role !== "customer") {

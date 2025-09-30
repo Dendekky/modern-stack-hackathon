@@ -48,8 +48,8 @@ export default function Home() {
         {/* Loading state or fallback for users without specific roles */}
         {!me && (
           <div className="text-center py-16">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading...</p>
+            <div className="w-8 h-8 bg-gray-200 rounded-full mx-auto mb-4 animate-pulse"></div>
+            <div className="h-4 w-24 bg-gray-200 rounded mx-auto animate-pulse"></div>
           </div>
         )}
 

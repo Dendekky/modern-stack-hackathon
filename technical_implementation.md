@@ -12,8 +12,8 @@
 - **AI**: OpenAI Node SDK
 - **Docs Enrichment**: Firecrawl SDK, Vector DB (Convex / Pinecone)
 - **Email**: Resend SDK + @convex-dev/resend component
-- **Voice**: Vapi SDK
-- **Payments**: Autumn SDK
+- (Future) **Voice**: Vapi SDK
+- (Future) **Payments**: Autumn SDK
 - **Analytics**: Recharts
 - **Developer Experience**: TypeScript, ESLint, Prettier
 - **Hosting**: Vercel
@@ -73,21 +73,13 @@
 
 ---
 
-## 5. Monetization (Autumn)
-- Free plan: core features + text-only tickets.
-- Pro plan: unlocks Vapi voice ticketing.
-- Autumn checkout:
-  - Simple integration for upgrade flow.
-  - Store plan state in Convex user profile.
+## 5. (Future) Monetization (Autumn)
+- Planned: upgrade flow and plan state in Convex user profile.
 
 ---
 
-## 6. Voice Ticketing (Vapi)
-- **Flow**
-  - User calls or speaks into mic.
-  - Vapi transcribes → creates new `ticket` in Convex.
-  - Trigger Resend → confirmation email.
-- Optional: AI-generated voice reply (status updates).
+## 6. (Future) Voice Ticketing (Vapi)
+- Planned: microphone capture → transcription → ticket creation → email trigger.
 
 ---
 

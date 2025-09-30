@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TicketCard } from "@/components/ui/ticket-card";
 import { KnowledgeBase } from "@/components/KnowledgeBase";
+import { DashboardSkeleton } from "@/components/skeletons/DashboardSkeleton";
 import Link from "next/link";
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
@@ -79,14 +80,7 @@ export default function DashboardPage() {
 
   // Show loading state while fetching user data
   if (me === undefined) {
-    return (
-      <PageLayout>
-        <div className="flex items-center justify-center py-16">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <span className="ml-2">Loading user data...</span>
-        </div>
-      </PageLayout>
-    );
+    return <DashboardSkeleton />;
   }
 
   if (!me || me.role !== "agent") {
@@ -104,14 +98,7 @@ export default function DashboardPage() {
   }
 
   if (tickets === undefined) {
-    return (
-      <PageLayout>
-        <div className="flex items-center justify-center py-16">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <span className="ml-2">Loading dashboard...</span>
-        </div>
-      </PageLayout>
-    );
+    return <DashboardSkeleton />;
   }
 
   return (

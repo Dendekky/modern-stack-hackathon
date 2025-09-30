@@ -4,8 +4,7 @@
 Build a modern customer support ticketing system with:
 - **Core reliability** (ticket creation, dashboard, notifications).
 - **AI-powered efficiency** (categorization, suggested replies, doc lookups).
-- **Voice-first innovation** (voice ticketing as a premium unlock).
-- **Monetization built-in** (Pro plan upgrade flow).
+<!-- - **Voice-first innovation** (voice ticketing as a premium unlock). -->
 
 ---
 
@@ -15,8 +14,7 @@ Build a modern customer support ticketing system with:
 - **OpenAI** → Ticket triage, summarization, and draft responses.
 - **Firecrawl** → Pull answers from company docs/FAQ.
 - **Better-Auth** → Authentication + roles (customers vs. agents).
-- **Vapi** → Voice ticketing (Pro feature).
-- **Autumn** → Monetization + plan upgrades.
+<!-- - **Vapi** → Voice ticketing (Pro feature). -->
 - **Next.js + React** → App framework and frontend.
 - **TailwindCSS + shadcn/ui** → Styling and UI components.
 
@@ -35,7 +33,6 @@ Build a modern customer support ticketing system with:
 - Suggested AI reply is drafted.
 - **Knowledge Base**: Pre-scraped Convex, Resend, and Firecrawl docs provide context.
 - AI reply enriched with relevant snippets from official documentation.
-- Agent sees AI-powered suggestions with "Upgrade to Pro" upsell.
  - Once sent, AI responses appear in the conversation thread visible to both agents and customers.
  - Customer opens **Ticket Detail** to view live status and conversation timeline.
 
@@ -46,26 +43,25 @@ Build a modern customer support ticketing system with:
    - **My Tickets** list with filters, status, priority, last updated.
    - **Ticket Detail** with conversation thread and AI summary.
    - **Real-time updates** via Convex subscriptions for status/messages.
-
+<!-- 
 ### 4. Monetization Moment (Autumn + Vapi)
 - Free plan: text-only ticket submission.
 - Judge clicks **Upgrade to Pro** in-app → Autumn checkout flow.
 - Upgrade succeeds → Vapi voice ticketing unlocks instantly.
 - Judge speaks into mic: “I need help with my order.”
-- Voice transcribed into a new ticket, email confirmation sent.
+- Voice transcribed into a new ticket, email confirmation sent. -->
 
 ---
 
-## 🎬 Big Demo Reveal
+<!-- ## 🎬 Big Demo Reveal
 **“See how Autumn unlocks premium voice ticketing in one click? That’s the future of customer support.”**
 
----
+--- -->
 
 ## ✅ Why This Order Works
 - Core works first → stable foundation.
 - AI layered in → instant delight.
 - Auth → real SaaS feel.
-- Autumn unlock → cinematic finale.
 
 ---
 
